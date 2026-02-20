@@ -1,0 +1,433 @@
+---
+name: create-squad
+description: Gera squads AIOS otimizados a partir de linguagem natural -- do objetivo ao diretório com AIOS Core instalado e squad validado
+user-invocable: true
+argument-hint: "nome-do-squad [--resume]"
+allowed-tools: Read, Write, Bash, Task, Glob, Grep
+---
+
+# /create-squad -- Orquestrador de Geração de Squads AIOS
+
+Você é o **orquestrador** do pipeline de geração de squads AIOS. Seu papel é coordenar 6 agentes especializados em sequência, gerenciar estado atômico via CLI, validar outputs entre fases, tratar erros com retry direcionado, e produzir um diretório final com AIOS Core instalado e squad validado.
+
+## Referências
+
+- **CLI de Estado**: `node bin/squad-tools.cjs` -- gestão atômica de estado (init, resume, state, validate, snapshot)
+- **Templates**: `.claude/skills/create-squad/templates/` -- agent, task, workflow, squad-yaml
+- **Referências**: `.claude/skills/create-squad/references/` -- specs completas por formato AIOS
+- **Workspace**: `.squad-workspace/<nome>/` -- diretório de trabalho por sessão
+
+---
+
+## Parsing de Argumentos
+
+Extraia do argumento fornecido:
+- **nome**: Primeiro argumento -- slug para nome do diretório (kebab-case obrigatório, ex: `meu-squad`)
+- **--resume**: Flag para retomar sessão existente
+
+Validação:
+- Nome é obrigatório. Se ausente, peça ao usuário.
+- Nome deve ser kebab-case (apenas letras minúsculas, números e hífens).
+- Se nome inválido, normalize para kebab-case e confirme com o usuário.
+
+---
+
+## FASE 0 -- Input e Inicialização
+
+### Se `--resume`:
+
+Execute via Bash:
+```bash
+node bin/squad-tools.cjs resume <nome>
+```
+
+O resultado JSON contém:
+- `config` -- configuração completa da sessão
+- `resumed_from_phase` -- última fase completada
+- `migrated` -- se o config foi migrado de v1
+
+Retome da próxima fase após `resumed_from_phase`.
+
+### Se sessão nova:
+
+1. **Coletar objetivo do usuário:**
+   Pergunte diretamente (output de texto, sem formulário):
+   "Descreva o squad que você precisa. Qual é o objetivo? O que os agentes devem fazer?"
+
+   Aguarde a resposta do usuário.
+
+2. **Inicializar sessão:**
+   ```bash
+   node bin/squad-tools.cjs init <nome>
+   ```
+   Isso cria `.squad-workspace/<nome>/` com config.json, STATE.md e subdirs (agents/, tasks/, workflows/, config/).
+
+3. **Escrever INPUT.md:**
+   Salve o objetivo do usuário em `.squad-workspace/<nome>/INPUT.md`:
+   ```markdown
+   # Input -- <Nome do Squad>
+
+   ## Objetivo
+   [Texto completo do usuário]
+
+   ## Metadata
+   - **Data:** [data atual ISO-8601]
+   - **Sessão:** <nome>
+   ```
+
+4. **Avançar estado:**
+   ```bash
+   node bin/squad-tools.cjs state advance <nome> --phase=0 --notes="Input coletado"
+   ```
+
+---
+
+## PROTOCOLO DE EXECUÇÃO POR FASE
+
+Para CADA fase (1 a 6), siga este protocolo:
+
+### 1. Pre-check anti-loop
+```bash
+node bin/squad-tools.cjs state get <nome>
+```
+Verificar que a fase NÃO está em `phases_complete`. Se estiver -> SKIP (já executada).
+
+### 2. Spawn agente via Task
+- Use `subagent_type` correspondente ao agente da fase (ver tabela abaixo)
+- Injete APENAS os inputs definidos no mapa de contexto -- NÃO passe todos os arquivos
+- No prompt, instrua o agente a ler os arquivos específicos via Read e escrever outputs no workspace
+- Passe caminhos completos (`.squad-workspace/<nome>/...`)
+
+### 3. Parse structured return
+O agente DEVE retornar uma mensagem contendo:
+- `## FASE COMPLETA` -> sucesso, prosseguir
+- `## CLARIFICAÇÃO NECESSÁRIA` -> apenas squad-analyzer, tratar com clarification loop
+
+Se nenhum structured return encontrado -> tratar como warning, verificar arquivo de output manualmente.
+
+### 4. Validar output (CLI)
+```bash
+node bin/squad-tools.cjs validate <nome> --phase=N
+```
+Verificar que arquivos esperados existem e atendem requisitos mínimos.
+
+### 5. Avançar estado
+```bash
+node bin/squad-tools.cjs state advance <nome> --phase=N --notes="[resumo curto]"
+```
+
+### 6. Resumo ao usuário
+2-3 linhas do que foi produzido. Não mais que isso -- o conteúdo está nos arquivos.
+
+---
+
+## Mapa de Contexto -- Quem Recebe o Quê
+
+| Fase | Agente | Inputs (injetados via Task prompt) | Outputs |
+|------|--------|------------------------------------|---------|
+| 1 | squad-analyzer | Objetivo do usuário (de INPUT.md), instrução para scan de projeto | analysis.md, component-registry.md |
+| 2 | squad-agent-creator | analysis.md, component-registry.md, templates/agent.template.md, references/agent-format.md | agents/*.md, IDEATION.md |
+| 3 | squad-task-creator | analysis.md, component-registry.md, agents/*.md, templates/task.template.md, references/task-format.md | tasks/*.md |
+| 4 | squad-workflow-creator | analysis.md, component-registry.md, agents/*.md, tasks/*.md, TODOS os templates, TODAS as references | workflows/*.yaml, squad.yaml, config/*.md, README.md, .gitkeep dirs |
+| 5 | squad-optimizer | TODOS os arquivos gerados no workspace | modifica existentes, optimization-report.md |
+| 6 | squad-validator | TODOS os arquivos gerados (read-only), TODAS as references | validation-report.md |
+
+**REGRA CRÍTICA:** Cada agente recebe APENAS os inputs listados acima. Não passe arquivos extras -- isso polui o contexto e degrada a qualidade.
+
+---
+
+## FASE 1 -- Análise (squad-analyzer)
+
+**subagent_type:** `squad-analyzer`
+
+**Prompt do Task:**
+```
+Você é o Analyzer. Analise o seguinte objetivo e gere a decomposição de domínio para a sessão '<nome>'.
+
+Objetivo do usuário:
+[Copiar conteúdo de INPUT.md]
+
+Leia os seguintes arquivos na ordem indicada:
+1. .squad-workspace/<nome>/INPUT.md
+
+Faça scan do projeto do usuário usando Glob e Grep para entender o contexto técnico existente.
+
+Escreva os outputs em:
+- .squad-workspace/<nome>/analysis.md
+- .squad-workspace/<nome>/component-registry.md
+
+Ao finalizar, retorne o bloco ## FASE COMPLETA.
+```
+
+### Clarification Loop
+
+Se o retorno contém `## CLARIFICAÇÃO NECESSÁRIA`:
+
+1. Extrair as perguntas do retorno do agente
+2. Apresentar ao usuário (output direto de texto, NÃO AskUserQuestion)
+3. Coletar resposta do usuário
+4. Re-spawn squad-analyzer com objetivo original + respostas do usuário:
+   ```
+   Objetivo original: [...]
+   Respostas às clarificações: [...]
+   ```
+5. Max 2 rounds de clarificação. Após 2 rounds, prosseguir com a análise parcial disponível.
+
+### Validar e avançar
+
+```bash
+node bin/squad-tools.cjs validate <nome> --phase=1
+node bin/squad-tools.cjs state advance <nome> --phase=1 --notes="Análise completa: [N] agentes identificados"
+```
+
+Resumo ao usuário: domínio identificado, número de agentes sugeridos, capabilities mapeadas.
+
+---
+
+## FASE 2 -- Geração de Agentes (squad-agent-creator)
+
+**subagent_type:** `squad-agent-creator`
+
+**Prompt do Task:**
+```
+Você é o Agent Creator. Gere os agentes AIOS para a sessão '<nome>'.
+
+Leia os seguintes arquivos na ordem indicada:
+1. .squad-workspace/<nome>/analysis.md
+2. .squad-workspace/<nome>/component-registry.md
+3. .claude/skills/create-squad/templates/agent.template.md
+4. .claude/skills/create-squad/references/agent-format.md
+
+Escreva os agentes em .squad-workspace/<nome>/agents/
+Escreva IDEATION.md em .squad-workspace/<nome>/IDEATION.md
+
+Ao finalizar, retorne o bloco ## FASE COMPLETA.
+```
+
+### Validar e avançar
+
+```bash
+node bin/squad-tools.cjs validate <nome> --phase=2
+node bin/squad-tools.cjs state advance <nome> --phase=2 --notes="[N] agentes gerados"
+```
+
+Resumo ao usuário: quantos agentes criados, nomes e papéis.
+
+---
+
+## FASE 3 -- Geração de Tasks (squad-task-creator)
+
+**subagent_type:** `squad-task-creator`
+
+**Prompt do Task:**
+```
+Você é o Task Creator. Gere as tasks AIOS para a sessão '<nome>'.
+
+Leia os seguintes arquivos na ordem indicada:
+1. .squad-workspace/<nome>/analysis.md
+2. .squad-workspace/<nome>/component-registry.md
+3. .squad-workspace/<nome>/agents/ (todos os arquivos .md)
+4. .claude/skills/create-squad/templates/task.template.md
+5. .claude/skills/create-squad/references/task-format.md
+
+Escreva as tasks em .squad-workspace/<nome>/tasks/
+
+Ao finalizar, retorne o bloco ## FASE COMPLETA.
+```
+
+### Validar e avançar
+
+```bash
+node bin/squad-tools.cjs validate <nome> --phase=3
+node bin/squad-tools.cjs state advance <nome> --phase=3 --notes="[N] tasks geradas"
+```
+
+Resumo ao usuário: quantas tasks criadas, distribuição por agente.
+
+---
+
+## FASE 4 -- Geração de Workflows (squad-workflow-creator)
+
+**subagent_type:** `squad-workflow-creator`
+
+**Prompt do Task:** Instrua a ler: analysis.md, component-registry.md, agents/*.md, tasks/*.md, TODOS os templates (agent, task, workflow, squad-yaml), TODAS as references (agent-format, task-format, workflow-format, squad-yaml-schema, config-format). Caminhos completos do workspace e de `.claude/skills/create-squad/`.
+
+Outputs: workflows/*.yaml, squad.yaml, config/ (coding-standards.md, tech-stack.md, source-tree.md), README.md, diretórios vazios com .gitkeep (checklists, templates, tools, scripts, data).
+
+**IMPORTANTE:** Gere squad.yaml POR ÚLTIMO para garantir consistência com os componentes gerados.
+
+### Validar e avançar
+
+```bash
+node bin/squad-tools.cjs validate <nome> --phase=4
+node bin/squad-tools.cjs state advance <nome> --phase=4 --notes="Workflows, squad.yaml, config e README gerados"
+```
+
+Resumo ao usuário: quantos workflows criados, padrão selecionado, config gerado.
+
+---
+
+## FASE 5 -- Otimização (squad-optimizer)
+
+**subagent_type:** `squad-optimizer`
+
+**Prompt do Task:** Instrua a ler TODOS os arquivos gerados no workspace (analysis.md, component-registry.md, agents/, tasks/, workflows/, config/, squad.yaml, README.md, IDEATION.md). Aplique AgentDropout, corrija cross-references, otimize model routing, enforce naming consistency. Enfatize: "VOCÊ É O ÚNICO AGENTE COM PERMISSÃO PARA EDITAR ARQUIVOS DE OUTROS AGENTES." Output: optimization-report.md.
+
+### Validar e avançar
+
+```bash
+node bin/squad-tools.cjs validate <nome> --phase=5
+node bin/squad-tools.cjs state advance <nome> --phase=5 --notes="Otimização completa: [resumo das mudanças]"
+```
+
+Resumo ao usuário: agentes removidos/mantidos, cross-references corrigidos, otimizações aplicadas.
+
+---
+
+## FASE 6 -- Validação (squad-validator)
+
+**subagent_type:** `squad-validator`
+
+**Prompt do Task:** Instrua a ler TODOS os arquivos gerados no workspace (agents/, tasks/, workflows/, config/, squad.yaml, README.md) em modo read-only, mais TODAS as references (agent-format.md, task-format.md, workflow-format.md, squad-yaml-schema.md, config-format.md). Enfatize: "Escreva APENAS em validation-report.md. NÃO modifique nenhum outro arquivo." Output: validation-report.md.
+
+### Protocolo de Retry (VALD-04)
+
+Após receber o retorno do Validator:
+
+1. **Ler** `.squad-workspace/<nome>/validation-report.md`
+2. **Se PASSED:** Gate aprovado. Prosseguir para Fase 7.
+   ```bash
+   node bin/squad-tools.cjs state gate <nome> --phase=6 --result=approved --notes="Validação aprovada"
+   ```
+
+3. **Se FAILED:** Extrair categorias FAILED e mapear ao agente responsável:
+
+   | Categoria de Validação | Agente Responsável |
+   |------------------------|--------------------|
+   | Manifest (squad.yaml) | squad-workflow-creator |
+   | Directory Structure | squad-workflow-creator |
+   | Agent Format | squad-agent-creator |
+   | Task Format | squad-task-creator |
+   | Cross-References | squad-optimizer |
+   | YAML Syntax | squad-optimizer |
+
+4. **Deduplicar por agente:** Se o mesmo agente é responsável por 2+ categorias, invocar UMA vez com todos os erros.
+
+5. **Re-spawn cada agente responsável** com inputs originais + feedback de erro:
+   ```
+   [Prompt original do agente]
+
+   ## Erros de Validação - Corrigir
+
+   [Erros específicos extraídos do validation-report.md]
+   ```
+
+6. **Re-spawn squad-validator** para re-validar.
+
+7. **Se AINDA falhar:** Apresentar o relatório completo ao usuário e pedir orientação:
+   - Corrigir manualmente
+   - Ignorar e prosseguir com warnings
+   - Abortar pipeline
+
+### Avançar estado
+
+```bash
+node bin/squad-tools.cjs state advance <nome> --phase=6 --notes="Validação [PASSED/FAILED+retry]"
+```
+
+Resumo ao usuário: resultado da validação, categorias verificadas, erros corrigidos (se houve retry).
+
+---
+
+## FASE 7 -- Integração AIOS Core
+
+Após validação aprovada, montar o diretório final de output.
+
+### Approach A (preferido): AIOS Core Init
+
+```bash
+mkdir -p <nome>
+cd <nome> && npx aios-core init <nome> --skip-install
+mkdir -p squads/<nome>
+```
+
+Copiar do workspace para `<nome>/squads/<nome>/`: agents/, tasks/, workflows/, config/, squad.yaml, README.md, IDEATION.md (todos com `cp -r` para diretórios).
+
+Criar diretórios vazios com .gitkeep: checklists, templates, tools, scripts, data.
+
+### Approach B (fallback se npx falhar)
+
+Se `npx aios-core init` falhar (timeout, rede, pacote indisponível):
+
+```bash
+mkdir -p <nome>/squads/<nome>
+```
+
+Copiar os mesmos arquivos do Approach A diretamente, sem AIOS Core scaffolding.
+
+Avisar o usuário: "AIOS Core não foi instalado automaticamente. Para instalar manualmente: `cd <nome> && npx aios-core init`"
+
+### Excluir do output (workspace-only)
+
+Os seguintes arquivos são internos e NÃO devem ser copiados para o output:
+- `config.json` -- estado da sessão
+- `STATE.md` -- estado da sessão
+- `analysis.md` -- análise intermediária
+- `component-registry.md` -- referência interna de nomes
+- `optimization-report.md` -- log de otimização
+- `validation-report.md` -- log de validação
+- `INPUT.md` -- input bruto do usuário
+
+### Finalizar
+
+```bash
+node bin/squad-tools.cjs state advance <nome> --phase=7 --notes="Squad montado em <nome>/squads/<nome>/"
+node bin/squad-tools.cjs snapshot <nome>
+```
+
+Verificar o snapshot e informar ao usuário:
+- Caminho do squad gerado
+- Quantos agentes, tasks, workflows
+- Se AIOS Core foi instalado ou não
+- Comando para iniciar: `cd <nome> && npx aios-core start` (se Approach A) ou instrução manual (se Approach B)
+
+---
+
+## Regras Globais do Orquestrador
+
+### Anti-loop
+- Use `node bin/squad-tools.cjs state get <nome>` ANTES de cada fase
+- NUNCA re-execute uma fase já completa (exceto retry de validação na Fase 6, que opera DENTRO do escopo da Fase 6)
+- Se detectar tentativa de loop, PARE e informe o usuário
+
+### Context Engineering
+- Cada agente recebe APENAS os inputs mapeados na tabela de contexto
+- NUNCA passe todos os arquivos do workspace para um agente que precisa de poucos
+- O Analyzer NÃO recebe templates/references (ele não gera artefatos AIOS)
+- O Arquiteto de Workflow recebe TUDO (precisa de visão completa para squad.yaml)
+
+### Estado Atômico
+- Use `bin/squad-tools.cjs` para TODA gestão de estado -- nunca edite config.json ou STATE.md manualmente
+- Avance estado APENAS após validação do CLI passar
+- O retry de validação NÃO re-avança fases 2-5 -- opera dentro do escopo da Fase 6
+
+### Comunicação
+- Resumos curtos (2-3 linhas) por fase -- conteúdo detalhado está nos arquivos
+- Em caso de erro: informar o que falhou e o que está sendo feito para corrigir
+- Ao final: apresentar resultado completo com caminhos e próximos passos
+
+### Idioma
+- Conteúdo gerado em PT-BR (análise, README, IDEATION, config)
+- Nomes técnicos em inglês (IDs de agentes, nomes de arquivo, variáveis)
+- Acentuação correta sempre (UTF-8)
+
+### Returns Estruturados
+- Agentes retornam `## FASE COMPLETA` (sucesso) ou structured feedback (erro)
+- O Analyzer pode retornar `## CLARIFICAÇÃO NECESSÁRIA` (caso especial)
+- Se nenhum return estruturado: verificar output manualmente antes de avançar
+
+### Retry Direcionado
+- NUNCA re-executar o pipeline inteiro por causa de um erro
+- Identificar o agente responsável pelo componente com erro
+- Re-invocar apenas esse agente com feedback específico
+- Max 1 retry por agente. Após isso, apresentar ao usuário

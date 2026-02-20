@@ -1,0 +1,16 @@
+{
+  "name": "nirvana-squad-creator-aios",
+  "version": "1.0.0",
+  "description": "Gera squads AIOS otimizados a partir de linguagem natural",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": ["aios", "squad", "claude-code", "multi-agent"],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "js-yaml": "^4.1.1"
+  }
+}
