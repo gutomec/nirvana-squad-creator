@@ -8,14 +8,15 @@ Dado um objetivo em linguagem natural, gerar o squad AIOS mais otimizado possive
 
 | Fase | Agente | Papel | Modelo |
 |------|--------|-------|--------|
-| 1 | Analyzer | Analisa requisitos, identifica dominio, gera component registry | Sonnet |
-| 2 | Agent Creator | Gera definicoes de agents com persona_profile e commands | Opus |
-| 3 | Task Creator | Gera tasks com contratos Entrada/Saida e checklists | Opus |
-| 4 | Workflow Creator | Gera workflows com transitions e selecao de pattern | Opus |
-| 5 | Optimizer | Elimina redundancias (AgentDropout), otimiza model routing | Opus |
-| 6 | Validator | Valida estrutura, cross-references, campos obrigatorios | Sonnet |
+| 1 | Analyzer | Analisa requisitos, identifica domínio, gera component registry | Sonnet |
+| 2 | Agent Creator | Gera definições de agents com persona_profile e commands | Opus |
+| 3 | Task Creator | Gera tasks com contratos Entrada/Saída e checklists | Opus |
+| 4 | Workflow Creator | Gera workflows com transitions e seleção de pattern | Opus |
+| 5 | Optimizer | Elimina redundâncias (AgentDropout), otimiza model routing | Opus |
+| 6 | Validator | Valida estrutura, cross-references, campos obrigatórios | Sonnet |
+| 7 | Deploy | Deploya squad em projeto AIOS (novo ou existente) e habilita slash commands | Orquestrador |
 
-Fluxo: Input --> Analyzer --> Agent Creator --> Task Creator --> Workflow Creator --> Optimizer --> Validator --> Output
+Fluxo: Input --> Analyzer --> Agent Creator --> Task Creator --> Workflow Creator --> Optimizer --> Validator --> Deploy + Habilitação
 
 ## Formatos AIOS -- Referencia Rapida
 
@@ -85,7 +86,76 @@ Tres arquivos Markdown freeform no diretorio `config/`:
 
 Referencia completa: `.claude/skills/create-squad/references/config-format.md`
 
-## Convencoes
+## Deploy e Habilitação de Squads
+
+Após a geração e validação do squad (Fases 1-6), a Fase 7 faz o deploy em um projeto AIOS e habilita os slash commands no Claude Code.
+
+### Opções de Deploy
+
+| Opção | Descrição |
+|-------|-----------|
+| **Novo projeto AIOS** | Cria diretório, roda `npx aios-core init`, deploya squad e habilita commands |
+| **Projeto AIOS existente** | Usuário informa caminho, valida `.aios-core/`, deploya squad e habilita commands |
+
+### Mecanismo de Habilitação de Slash Commands
+
+O AIOS Core registra slash commands no Claude Code via a estrutura `.claude/commands/{prefix}/agents/`. O processo:
+
+1. Ler `slashPrefix` do `squad.yaml` (ex: `ds` → commands ficam em `/ds:agents:*`)
+2. Copiar agents do squad para `.claude/commands/{prefix}/agents/`
+3. Criar/atualizar `.aios-sync.yaml` na raiz do projeto com o alias do squad
+
+Após isso, o Claude Code reconhece os comandos automaticamente:
+```
+/{prefix}:agents:{agent-id}   → Ativa o agente correspondente
+```
+
+### Estrutura de Deploy
+
+```
+<projeto-aios>/
+├── .aios-core/                    # AIOS Core (já existente ou recém-instalado)
+├── .claude/
+│   └── commands/
+│       ├── AIOS/agents/           # Agentes core do AIOS
+│       └── <prefix>/agents/       # ← Agentes do squad (habilitados aqui)
+├── .aios-sync.yaml                # ← Mapeamento squad → prefix
+└── squads/
+    └── <nome-do-squad>/           # ← Squad deployado aqui
+        ├── agents/
+        ├── tasks/
+        ├── workflows/
+        ├── config/
+        ├── squad.yaml
+        └── README.md
+```
+
+### .aios-sync.yaml
+
+Arquivo de configuração que mapeia squads para prefixos de slash commands:
+
+```yaml
+active_ides:
+  - claude
+squad_aliases:
+  meu-squad: ms        # /ms:agents:*
+  outro-squad: os       # /os:agents:*
+sync_mappings:
+  squad_agents:
+    source: 'squads/*/agents/'
+    destinations:
+      claude:
+        - path: '.claude/commands/{squad_alias}/agents/'
+          format: 'md'
+```
+
+Para re-sincronizar manualmente após editar agentes:
+```bash
+# Copiar agents atualizados para .claude/commands/
+cp squads/<nome>/agents/*.md .claude/commands/<prefix>/agents/
+```
+
+## Convenções
 
 **Naming:** kebab-case para tudo (arquivos, IDs, nomes de squads, commands). Excecao: task identifiers usam camelCase().
 
@@ -114,16 +184,30 @@ nirvana-squad-creator/
 ├── CLAUDE.md
 ├── bin/squad-tools.cjs
 ├── .claude/skills/create-squad/
+│   ├── SKILL.md            # Orquestrador (Fases 0-7)
 │   ├── templates/          # Templates anotados (squad.yaml, agent, task, workflow)
 │   └── references/         # Specs completas por formato (5 docs)
 └── .squad-workspace/       # Runtime workspace (gitignored)
     └── <session>/
-        ├── config.json     # Estado da sessao
+        ├── config.json     # Estado da sessão
         ├── analysis.md     # Output do Analyzer
         ├── agents/         # Agent definitions
         ├── tasks/          # Task definitions
         ├── workflows/      # Workflow definitions
         └── config/         # Config files
+
+# Output (projeto AIOS destino -- novo ou existente):
+<projeto-aios>/
+├── .aios-core/             # AIOS Core framework
+├── .claude/commands/<prefix>/agents/  # Slash commands habilitados
+├── .aios-sync.yaml         # Mapeamento squad → prefix
+└── squads/<nome>/          # Squad deployado
+    ├── agents/*.md
+    ├── tasks/*.md
+    ├── workflows/*.yaml
+    ├── config/*.md
+    ├── squad.yaml
+    └── README.md
 ```
 
 ## Links

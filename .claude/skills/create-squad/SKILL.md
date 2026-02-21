@@ -339,57 +339,147 @@ Resumo ao usuário: resultado da validação, categorias verificadas, erros corr
 
 ---
 
-## FASE 7 -- Integração AIOS Core
+## FASE 7 -- Deploy e Habilitação do Squad
 
-Após validação aprovada, montar o diretório final de output.
+Após validação aprovada, fazer deploy do squad em um projeto AIOS e habilitar os slash commands.
 
-### Approach A (preferido): AIOS Core Init
+### Passo 1: Perguntar ao usuário o destino
+
+Usar AskUserQuestion com duas opções:
+
+- **Novo projeto AIOS**: Cria um diretório novo, instala AIOS Core e deploya o squad
+- **Projeto AIOS existente**: O usuário informa o caminho de um projeto que já tem AIOS Core instalado
+
+### Passo 2A: Novo projeto AIOS
+
+Se o usuário escolher criar um novo projeto:
+
+1. **Perguntar o caminho** onde criar o projeto (default: diretório atual)
+2. **Criar diretório e instalar AIOS Core:**
+   ```bash
+   mkdir -p <caminho>/<nome>
+   cd <caminho>/<nome> && npx aios-core init
+   ```
+   NOTA: `npx aios-core init` é interativo (escolha de idioma, tipo de projeto, etc.).
+   Se o comando travar ou falhar, avisar o usuário para rodar manualmente e depois retomar.
+
+3. **Validar instalação** -- verificar que `.aios-core/` e `.claude/` existem:
+   ```bash
+   ls <caminho>/<nome>/.aios-core/core-config.yaml
+   ls <caminho>/<nome>/.claude/CLAUDE.md
+   ```
+   Se não existirem, avisar que AIOS Core não foi instalado e pedir ao usuário para instalar manualmente.
+
+4. Prosseguir para Passo 3 (Deploy do Squad).
+
+### Passo 2B: Projeto AIOS existente
+
+Se o usuário escolher um projeto existente:
+
+1. **Coletar o caminho** do projeto AIOS existente
+2. **Validar que é um projeto AIOS** -- verificar existência de:
+   - `<caminho>/.aios-core/core-config.yaml`
+   - `<caminho>/squads/` (diretório de squads)
+   Se não for um projeto AIOS válido, informar e pedir outro caminho.
+
+3. Prosseguir para Passo 3 (Deploy do Squad).
+
+### Passo 3: Deploy do Squad
+
+Independente se novo ou existente, o `<projeto>` é o caminho do projeto AIOS destino.
+
+1. **Copiar squad para o projeto:**
+   ```bash
+   mkdir -p <projeto>/squads/<nome>
+   cp -r .squad-workspace/<nome>/agents <projeto>/squads/<nome>/
+   cp -r .squad-workspace/<nome>/tasks <projeto>/squads/<nome>/
+   cp -r .squad-workspace/<nome>/workflows <projeto>/squads/<nome>/
+   cp -r .squad-workspace/<nome>/config <projeto>/squads/<nome>/
+   cp .squad-workspace/<nome>/squad.yaml <projeto>/squads/<nome>/
+   cp .squad-workspace/<nome>/README.md <projeto>/squads/<nome>/
+   cp .squad-workspace/<nome>/IDEATION.md <projeto>/squads/<nome>/
+   ```
+   Criar diretórios vazios com .gitkeep: checklists, templates, tools, scripts, data.
+
+2. **Excluir do output** (arquivos workspace-only que NÃO devem ser copiados):
+   - `config.json`, `STATE.md` -- estado da sessão
+   - `analysis.md`, `component-registry.md` -- referência interna
+   - `optimization-report.md`, `validation-report.md` -- logs internos
+   - `INPUT.md` -- input bruto do usuário
+
+### Passo 4: Habilitar Slash Commands
+
+O AIOS Core registra slash commands no Claude Code via `.claude/commands/{prefix}/agents/`.
+O `slashPrefix` está definido no `squad.yaml` (campo `slashPrefix`).
+
+1. **Extrair o slashPrefix** do squad.yaml:
+   ```bash
+   grep 'slashPrefix:' <projeto>/squads/<nome>/squad.yaml
+   ```
+   Se não tiver slashPrefix, usar o `name` do squad como prefixo.
+
+2. **Criar diretório de commands e copiar agentes:**
+   ```bash
+   mkdir -p <projeto>/.claude/commands/<prefix>/agents
+   cp <projeto>/squads/<nome>/agents/*.md <projeto>/.claude/commands/<prefix>/agents/
+   ```
+
+3. **Criar/atualizar .aios-sync.yaml** no projeto destino:
+   - Se `.aios-sync.yaml` NÃO existe, criar com o squad:
+     ```yaml
+     active_ides:
+       - claude
+     squad_aliases:
+       <nome>: <prefix>
+     sync_mappings:
+       squad_agents:
+         source: 'squads/*/agents/'
+         destinations:
+           claude:
+             - path: '.claude/commands/{squad_alias}/agents/'
+               format: 'md'
+     ```
+   - Se `.aios-sync.yaml` JÁ existe, adicionar apenas o alias do squad:
+     Adicionar `<nome>: <prefix>` na seção `squad_aliases`.
+
+4. **Verificar que os commands foram registrados:**
+   ```bash
+   ls <projeto>/.claude/commands/<prefix>/agents/
+   ```
+
+### Passo 5: Finalizar
 
 ```bash
-mkdir -p <nome>
-cd <nome> && npx aios-core init <nome> --skip-install
-mkdir -p squads/<nome>
-```
-
-Copiar do workspace para `<nome>/squads/<nome>/`: agents/, tasks/, workflows/, config/, squad.yaml, README.md, IDEATION.md (todos com `cp -r` para diretórios).
-
-Criar diretórios vazios com .gitkeep: checklists, templates, tools, scripts, data.
-
-### Approach B (fallback se npx falhar)
-
-Se `npx aios-core init` falhar (timeout, rede, pacote indisponível):
-
-```bash
-mkdir -p <nome>/squads/<nome>
-```
-
-Copiar os mesmos arquivos do Approach A diretamente, sem AIOS Core scaffolding.
-
-Avisar o usuário: "AIOS Core não foi instalado automaticamente. Para instalar manualmente: `cd <nome> && npx aios-core init`"
-
-### Excluir do output (workspace-only)
-
-Os seguintes arquivos são internos e NÃO devem ser copiados para o output:
-- `config.json` -- estado da sessão
-- `STATE.md` -- estado da sessão
-- `analysis.md` -- análise intermediária
-- `component-registry.md` -- referência interna de nomes
-- `optimization-report.md` -- log de otimização
-- `validation-report.md` -- log de validação
-- `INPUT.md` -- input bruto do usuário
-
-### Finalizar
-
-```bash
-node bin/squad-tools.cjs state advance <nome> --phase=7 --notes="Squad montado em <nome>/squads/<nome>/"
+node bin/squad-tools.cjs state advance <nome> --phase=7 --notes="Squad deployado em <projeto>/squads/<nome>/, commands habilitados em /<prefix>:"
 node bin/squad-tools.cjs snapshot <nome>
 ```
 
-Verificar o snapshot e informar ao usuário:
-- Caminho do squad gerado
+Informar ao usuário:
+- Caminho do squad deployado
 - Quantos agentes, tasks, workflows
-- Se AIOS Core foi instalado ou não
-- Comando para iniciar: `cd <nome> && npx aios-core start` (se Approach A) ou instrução manual (se Approach B)
+- Slash commands disponíveis: `/<prefix>:agents:<agent-id>` para cada agente
+- Se AIOS Core foi instalado ou se já existia
+- Exemplo de uso: `/<prefix>:agents:<primeiro-agente>`
+
+**Exemplo de output:**
+
+```
+Squad deployado com sucesso!
+
+  Projeto:    /caminho/do/projeto
+  Squad:      squads/<nome>/
+  Agentes:    7
+  Tasks:      8
+  Workflows:  2
+
+  Slash commands disponíveis:
+    /<prefix>:agents:<agent-1>
+    /<prefix>:agents:<agent-2>
+    ...
+
+  Para usar, abra o Claude Code no projeto e digite:
+    /<prefix>:agents:<agent-1>
+```
 
 ---
 
