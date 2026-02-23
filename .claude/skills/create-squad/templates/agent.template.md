@@ -19,11 +19,13 @@ agent:
 persona_profile:                   # <!-- REQUIRED --> Perfil de personalidade
   archetype: Builder               # <!-- REQUIRED --> Builder | Guardian | Balancer | Flow_Master
   communication:
-    tone: pragmatic                # <!-- REQUIRED --> pragmatic | empathetic | analytical | collaborative
-    greeting_levels:               # <!-- REQUIRED --> Templates de saudacao por nivel de verbosidade
-      minimal: "\U0001F4E5 data-extractor Agent ready"         # Comeca com o icon do agente
-      named: "\U0001F4E5 DataExtractor (Builder) ready."       # Inclui nome e archetype
-      archetypal: "\U0001F4E5 DataExtractor (Builder) - Data Extraction Specialist ready. Focused on reliable, efficient data extraction from any source."
+    tone: pragmatic                # <!-- REQUIRED --> formal | informal | technical | friendly | assertive | collaborative | analytical | creative | strategic | empathetic | pragmatic
+
+# --- Greeting Levels (TOP-LEVEL, NAO aninhado dentro de persona_profile) ---
+greeting_levels:                   # <!-- REQUIRED --> Templates de saudacao por nivel de verbosidade
+  minimal: "\U0001F4E5 data-extractor Agent ready"         # Comeca com o icon do agente
+  named: "\U0001F4E5 DataExtractor (Builder) ready."       # Inclui nome e archetype
+  archetypal: "\U0001F4E5 DataExtractor (Builder) - Data Extraction Specialist ready. Focused on reliable, efficient data extraction from any source."
 
 # --- Persona (opcional, mas recomendado para squads complexos) ---
 persona:
@@ -114,8 +116,8 @@ Spec completa com todos os campos, tipos, e regras de validacao: [references/age
 
 1. `agent.id` em kebab-case (minusculas, hifens, sem espacos ou underscores)
 2. `persona_profile.archetype` e um dos: `Builder`, `Guardian`, `Balancer`, `Flow_Master`
-3. `persona_profile.communication.tone` e um dos: `pragmatic`, `empathetic`, `analytical`, `collaborative`
-4. `greeting_levels` contem as 3 chaves: `minimal`, `named`, `archetypal`
+3. `persona_profile.communication.tone` e um dos: `formal`, `informal`, `technical`, `friendly`, `assertive`, `collaborative`, `analytical`, `creative`, `strategic`, `empathetic`, `pragmatic`
+4. `greeting_levels` e um bloco **top-level** no frontmatter (NAO aninhado dentro de persona_profile) e contem as 3 chaves: `minimal`, `named`, `archetypal`
 5. Cada greeting comeca com o emoji do agente (`agent.icon`)
 6. Nomes de commands seguem o padrao `*command-name` (asterisco + kebab-case)
 7. Arquivos em `dependencies` existem no diretorio do squad
