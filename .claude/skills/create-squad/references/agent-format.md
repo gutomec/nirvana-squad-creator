@@ -23,8 +23,8 @@ The YAML block defines the agent's identity, persona profile, optional commands,
 | `agent.icon` | string | Emoji identifier | Single emoji character |
 | `agent.whenToUse` | string | Use case description triggering this agent | Free text |
 | `persona_profile.archetype` | enum | Behavioral archetype | `Builder` \| `Guardian` \| `Balancer` \| `Flow_Master` |
-| `persona_profile.communication.tone` | enum | Communication style | `pragmatic` \| `empathetic` \| `analytical` \| `collaborative` |
-| `persona_profile.communication.greeting_levels` | object | Greeting templates by verbosity level | Must include `minimal`, `named`, `archetypal` keys |
+| `persona_profile.communication.tone` | enum | Communication style | `formal` \| `informal` \| `technical` \| `friendly` \| `assertive` \| `collaborative` \| `analytical` \| `creative` \| `strategic` \| `empathetic` \| `pragmatic` |
+| `greeting_levels` | object | Greeting templates by verbosity level (top-level, NOT nested inside persona_profile) | Must include `minimal`, `named`, `archetypal` keys |
 
 ---
 
@@ -66,10 +66,11 @@ persona_profile:
   archetype: Builder
   communication:
     tone: pragmatic
-    greeting_levels:
-      minimal: "\U0001F4E5 data-extractor Agent ready"
-      named: "\U0001F4E5 DataExtractor (Builder) ready."
-      archetypal: "\U0001F4E5 DataExtractor (Builder) - Data Extraction Specialist ready. Focused on reliable, efficient data extraction from any source."
+
+greeting_levels:
+  minimal: "\U0001F4E5 data-extractor Agent ready"
+  named: "\U0001F4E5 DataExtractor (Builder) ready."
+  archetypal: "\U0001F4E5 DataExtractor (Builder) - Data Extraction Specialist ready. Focused on reliable, efficient data extraction from any source."
 
 persona:
   role: "Data extraction and ingestion specialist"
@@ -158,8 +159,8 @@ Provides detailed instructions for the agent's operation, including edge cases, 
 
 - `agent.id` is in kebab-case (lowercase, hyphens only, no spaces or underscores)
 - `persona_profile.archetype` is one of: `Builder`, `Guardian`, `Balancer`, `Flow_Master`
-- `persona_profile.communication.tone` is one of: `pragmatic`, `empathetic`, `analytical`, `collaborative`
-- `persona_profile.communication.greeting_levels` contains all three keys: `minimal`, `named`, `archetypal`
+- `persona_profile.communication.tone` is one of: `formal`, `informal`, `technical`, `friendly`, `assertive`, `collaborative`, `analytical`, `creative`, `strategic`, `empathetic`, `pragmatic`
+- `greeting_levels` is a **top-level** block in the frontmatter (NOT nested inside `persona_profile.communication`) and contains all three keys: `minimal`, `named`, `archetypal`
 - Each greeting level string begins with the agent's icon emoji
 - Command names follow the `*command-name` pattern (asterisk prefix, kebab-case)
 - All files referenced in `dependencies` exist in the squad directory

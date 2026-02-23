@@ -77,8 +77,8 @@ Para cada agente na registry, crie o arquivo `agents/<agent-id>.md` seguindo o t
 | `agent.icon` | Emoji identificador | Um emoji que represente o papel |
 | `agent.whenToUse` | Quando usar | Descreva o caso de uso |
 | `persona_profile.archetype` | Archetype comportamental | Um dos 4 validos (ver tabela) |
-| `persona_profile.communication.tone` | Tom de comunicacao | Um dos 4 validos |
-| `greeting_levels` | 3 saudacoes | `minimal`, `named`, `archetypal` |
+| `persona_profile.communication.tone` | Tom de comunicacao | Um dos 11 validos (ver tabela abaixo) |
+| `greeting_levels` | 3 saudacoes (**top-level**, NAO dentro de persona_profile) | `minimal`, `named`, `archetypal` |
 
 #### Bloco YAML (Campos Opcionais Recomendados)
 
@@ -112,14 +112,19 @@ Escolha o archetype com base no papel do agente:
 | `Balancer` | Agentes que **otimizam** -- equilibram tradeoffs, mediam conflitos | `collaborative` |
 | `Flow_Master` | Agentes que **orquestram** -- coordenam fluxos, gerenciam sequencia | `pragmatic` |
 
-**Regra:** Existem APENAS estes 4 archetypes. NAO invente novos. O tom de comunicacao pode variar (`pragmatic`, `empathetic`, `analytical`, `collaborative`) independente do archetype.
+**Regra:** Existem APENAS estes 4 archetypes. NAO invente novos. O tom de comunicacao pode variar independente do archetype. Valores validos de tone: `formal`, `informal`, `technical`, `friendly`, `assertive`, `collaborative`, `analytical`, `creative`, `strategic`, `empathetic`, `pragmatic`.
 
 ### Passo 6: Definir Greeting Levels
 
-Cada agente DEVE ter 3 niveis de saudacao que comecam com o icon do agente:
+Cada agente DEVE ter 3 niveis de saudacao que comecam com o icon do agente. **IMPORTANTE: `greeting_levels` e um bloco TOP-LEVEL no frontmatter YAML, NAO aninhado dentro de `persona_profile.communication`.**
 
 ```yaml
-greeting_levels:
+persona_profile:
+  archetype: Builder
+  communication:
+    tone: pragmatic
+
+greeting_levels:                   # <-- TOP-LEVEL, fora de persona_profile
   minimal: "<icon> <agent-id> Agent ready"
   named: "<icon> <AgentName> (<Archetype>) ready."
   archetypal: "<icon> <AgentName> (<Archetype>) - <Title> ready. <Frase sobre foco>."
@@ -211,7 +216,7 @@ Antes de retornar, verifique para CADA agente gerado:
 - [ ] `agent.icon` presente (um emoji)
 - [ ] `agent.whenToUse` presente e especifico
 - [ ] `persona_profile.archetype` valido (Builder/Guardian/Balancer/Flow_Master)
-- [ ] `persona_profile.communication.tone` valido (pragmatic/empathetic/analytical/collaborative)
+- [ ] `persona_profile.communication.tone` valido (formal/informal/technical/friendly/assertive/collaborative/analytical/creative/strategic/empathetic/pragmatic)
 - [ ] `greeting_levels` com 3 keys (minimal, named, archetypal)
 - [ ] Cada greeting comeca com o icon do agente
 - [ ] Commands seguem padrao `*command-name`

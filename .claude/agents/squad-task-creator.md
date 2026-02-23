@@ -88,8 +88,8 @@ Cada task DEVE conter todos estes campos:
 | `responsavel` | string | Nome legivel do agente responsavel -- deve existir em agents/ |
 | `responsavel_type` | enum | `Agente` (sempre, neste pipeline) |
 | `atomic_layer` | enum | Classificacao de complexidade (ver tabela abaixo) |
-| `Entrada` | array | Minimo 1 entrada com campo, tipo, origen, obrigatorio |
-| `Saida` | array | Minimo 1 saida com campo, tipo, destino, persistido |
+| `Entrada` | array | Minimo 1 entrada com nome, tipo, obrigatorio, descricao |
+| `Saida` | array | Minimo 1 saida com nome, tipo, obrigatorio, descricao |
 | `Checklist` | object | pre-conditions e post-conditions (arrays) |
 
 ### Classificacao de Atomic Layer
@@ -114,34 +114,34 @@ Os contratos sao a parte mais critica de cada task. Eles definem exatamente que 
 
 ```yaml
 Entrada:
-  - campo: nomeDoCampo         # Nome descritivo do campo
+  - nome: nomeDoCampo         # Nome descritivo do campo
     tipo: string               # Tipo: string, object, array, array<string>, boolean, file, markdown, yaml
-    origen: "fonte do dado"    # De onde vem: outro task output, input do usuario, config, arquivo
     obrigatorio: true          # Se e mandatorio para a task funcionar
+    descricao: "De onde vem e para que serve este input"
 ```
 
 ### Formato de Saida
 
 ```yaml
 Saida:
-  - campo: nomeDoCampo         # Nome descritivo do campo
+  - nome: nomeDoCampo         # Nome descritivo do campo
     tipo: file                 # Tipo do dado de saida
-    destino: "para onde vai"   # Destino: proximo task, arquivo, output final
-    persistido: true           # Se e salvo em disco
+    obrigatorio: true          # Se o output e obrigatorio
+    descricao: "Para onde vai e o que representa este output"
 ```
 
 ### Regras de Contratos
 
-1. **`Entrada.origen`** deve indicar EXATAMENTE de onde o dado vem:
-   - De outro task: `"<taskIdentifier()> task output"` (ex: `"analyzeRequirements() task output"`)
-   - Do usuario: `"input.md (user requirements)"`
-   - De config: `"config/<file>.md"`
-   - De arquivo: `"<path/to/file>"`
+1. **`Entrada.descricao`** deve indicar EXATAMENTE de onde o dado vem e sua finalidade:
+   - De outro task: `"Output do analyzeRequirements() — análise de domínio"`
+   - Do usuario: `"Input do usuário (requisitos em linguagem natural)"`
+   - De config: `"Arquivo config/<file>.md"`
+   - De arquivo: `"Leitura de <path/to/file>"`
 
-2. **`Saida.destino`** deve indicar EXATAMENTE para onde o dado vai:
-   - Para outro task: `"<taskIdentifier()> task"` (ex: `"transformData() task"`)
-   - Para arquivo: `"<path/to/file>"`
-   - Para output final: `"final output (squad delivery)"`
+2. **`Saida.descricao`** deve indicar EXATAMENTE para onde o dado vai e o que representa:
+   - Para outro task: `"Consumido por transformData() task"`
+   - Para arquivo: `"Gravado em <path/to/file>"`
+   - Para output final: `"Output final (entrega do squad)"`
 
 3. **Tipos devem ser especificos:**
    - `string` -- texto simples
@@ -238,7 +238,7 @@ Tasks DEVEM referenciar agentes corretamente:
 - **NAO embutia o formato de memoria** -- leia a referencia `task-format.md` em runtime
 - **NAO crie tasks que nao estao no registry** -- se nao esta la, nao existe
 - **NAO altere nomes canonicos** -- identifiers e filenames vem exatamente do registry
-- **NAO deixe origenes ou destinos vagos** -- especifique exatamente de onde vem e para onde vai
+- **NAO deixe descricoes vagas** -- especifique exatamente de onde vem, para onde vai e o que representa
 
 ## Checklist Pre-Entrega
 
@@ -248,13 +248,13 @@ Antes de retornar, verifique para CADA task gerada:
 - [ ] `responsavel` presente e corresponde a um agente real em agents/
 - [ ] `responsavel_type` e `Agente`
 - [ ] `atomic_layer` e um valor valido (Atom/Molecule/Organism ou funcional)
-- [ ] `Entrada` tem pelo menos 1 item com campo/tipo/origen/obrigatorio
-- [ ] `Saida` tem pelo menos 1 item com campo/tipo/destino/persistido
+- [ ] `Entrada` tem pelo menos 1 item com nome/tipo/obrigatorio/descricao
+- [ ] `Saida` tem pelo menos 1 item com nome/tipo/obrigatorio/descricao
 - [ ] `Checklist` tem pre-conditions e post-conditions
 - [ ] Pipeline diagram presente
 - [ ] Filename e kebab-case.md e corresponde ao registry
 - [ ] Tipos sao especificos (nao genericos)
-- [ ] Origenes e destinos sao especificos (nao vagos)
+- [ ] Descricoes sao especificas (nao vagas)
 
 ## Structured Return
 

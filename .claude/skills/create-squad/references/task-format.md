@@ -22,16 +22,16 @@ Tasks follow a "task-first architecture" where each task is a self-contained uni
 | `responsavel_type` | enum | Type of responsible entity | `Agente` \| `Worker` \| `Humano` \| `Clone` |
 | `atomic_layer` | enum | Complexity classification | Structural: `Atom` \| `Molecule` \| `Organism` \| `Template` \| `Page` |
 | | | | Functional: `Config` \| `Strategy` \| `Content` \| `Media` \| `Layout` \| `Analysis` |
-| `Entrada` | array | Input specifications | Each item: `campo`, `tipo`, `origen`, `obrigatorio` |
-| `Entrada[].campo` | string | Input field name | Free text |
+| `Entrada` | array | Input specifications | Each item: `nome`, `tipo`, `obrigatorio`, `descricao` |
+| `Entrada[].nome` | string | Input field name | Free text |
 | `Entrada[].tipo` | string | Data type | e.g., `string`, `object`, `array`, `boolean`, `file` |
-| `Entrada[].origen` | string | Where this input comes from | Reference to another task output or external source |
 | `Entrada[].obrigatorio` | boolean | Whether input is mandatory | `true` or `false` |
-| `Saida` | array | Output specifications | Each item: `campo`, `tipo`, `destino`, `persistido` |
-| `Saida[].campo` | string | Output field name | Free text |
+| `Entrada[].descricao` | string | Description of this input (where it comes from, purpose) | Free text |
+| `Saida` | array | Output specifications | Each item: `nome`, `tipo`, `obrigatorio`, `descricao` |
+| `Saida[].nome` | string | Output field name | Free text |
 | `Saida[].tipo` | string | Data type | e.g., `string`, `object`, `array`, `file` |
-| `Saida[].destino` | string | Where this output goes | Reference to consuming task or storage |
-| `Saida[].persistido` | boolean | Whether output is saved to disk | `true` or `false` |
+| `Saida[].obrigatorio` | boolean | Whether output is required | `true` or `false` |
+| `Saida[].descricao` | string | Description of this output (where it goes, purpose) | Free text |
 | `Checklist` | object | Validation conditions | Contains `pre-conditions` and `post-conditions` arrays |
 
 ---
@@ -88,24 +88,24 @@ responsavel_type: Agente
 atomic_layer: Molecule
 
 Entrada:
-  - campo: sourceConfig
+  - nome: sourceConfig
     tipo: object
-    origen: "input.md (user requirements)"
     obrigatorio: true
-  - campo: extractionScope
+    descricao: "Configuração da fonte de dados (de input.md, requisitos do usuário)"
+  - nome: extractionScope
     tipo: string
-    origen: "analysis.md (analyzer output)"
     obrigatorio: false
+    descricao: "Escopo da extração (de analysis.md, output do analyzer)"
 
 Saida:
-  - campo: rawData
+  - nome: rawData
     tipo: file
-    destino: "transformData() task"
-    persistido: true
-  - campo: extractionLog
+    obrigatorio: true
+    descricao: "Dados brutos extraídos (destino: transformData() task)"
+  - nome: extractionLog
     tipo: object
-    destino: "validation-report.md"
-    persistido: true
+    obrigatorio: true
+    descricao: "Log da extração com row count e duração (destino: validation-report.md)"
 
 Checklist:
   pre-conditions:
@@ -208,8 +208,8 @@ A task uses either a structural or functional classification, whichever best des
 - `Entrada` array has at least one entry
 - `Saida` array has at least one entry
 - `Checklist` contains both `pre-conditions` and `post-conditions` arrays
-- Each `Entrada` item has all four fields: `campo`, `tipo`, `origen`, `obrigatorio`
-- Each `Saida` item has all four fields: `campo`, `tipo`, `destino`, `persistido`
+- Each `Entrada` item has all four fields: `nome`, `tipo`, `obrigatorio`, `descricao`
+- Each `Saida` item has all four fields: `nome`, `tipo`, `obrigatorio`, `descricao`
 - `responsavel` value matches an agent name or role defined in the squad
 
 ---

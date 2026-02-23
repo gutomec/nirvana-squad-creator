@@ -15,25 +15,25 @@ atomic_layer: Molecule             # <!-- REQUIRED --> Classificacao de complexi
 
 # --- Input Contract ---
 Entrada:                           # <!-- REQUIRED --> Especificacoes de input
-  - campo: sourceConfig            # Nome do campo de entrada
+  - nome: sourceConfig             # Nome do campo de entrada
     tipo: object                   # Tipo de dado (string, object, array, boolean, file)
-    origen: "input.md (user requirements)"  # De onde vem este input
     obrigatorio: true              # Se o input e mandatorio
-  - campo: extractionScope
+    descricao: "Configuração da fonte de dados (de input.md, requisitos do usuário)"
+  - nome: extractionScope
     tipo: string
-    origen: "analysis.md (analyzer output)"
     obrigatorio: false
+    descricao: "Escopo da extração (de analysis.md, output do analyzer)"
 
 # --- Output Contract ---
 Saida:                             # <!-- REQUIRED --> Especificacoes de output
-  - campo: rawData                 # Nome do campo de saida
+  - nome: rawData                  # Nome do campo de saida
     tipo: file                     # Tipo de dado
-    destino: "transformData() task"  # Para onde vai este output
-    persistido: true               # Se o output e salvo em disco
-  - campo: extractionLog
+    obrigatorio: true              # Se o output e obrigatorio
+    descricao: "Dados brutos extraídos (destino: transformData() task)"
+  - nome: extractionLog
     tipo: object
-    destino: "validation-report.md"
-    persistido: true
+    obrigatorio: true
+    descricao: "Log da extração com row count e duração (destino: validation-report.md)"
 
 # --- Validation ---
 Checklist:                         # <!-- REQUIRED --> Condicoes de validacao
