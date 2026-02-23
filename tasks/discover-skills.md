@@ -5,28 +5,28 @@ responsavel_type: Agente
 atomic_layer: Molecule
 
 Entrada:
-  - campo: analysisMd
+  - nome: analysisMd
     tipo: file
-    origen: "analyzeRequirements() task output"
+    descricao: "analyzeRequirements() task output"
     obrigatorio: true
-  - campo: componentRegistryMd
+  - nome: componentRegistryMd
     tipo: file
-    origen: "analyzeRequirements() task output"
+    descricao: "analyzeRequirements() task output"
     obrigatorio: true
-  - campo: squadYaml
+  - nome: squadYaml
     tipo: file
-    origen: "createWorkflows() task output"
+    descricao: "createWorkflows() task output"
     obrigatorio: true
-  - campo: ccSkillReportMd
+  - nome: ccSkillReportMd
     tipo: file
-    origen: "createCcSkill() task output"
+    descricao: "createCcSkill() task output"
     obrigatorio: false
 
 Saida:
-  - campo: skillsDiscoveryReportMd
+  - nome: skillsDiscoveryReportMd
     tipo: file
-    destino: "orquestrador (para instalação interativa)"
-    persistido: true
+    descricao: "orquestrador (para instalação interativa)"
+    obrigatorio: true
 
 Checklist:
   pre-conditions:

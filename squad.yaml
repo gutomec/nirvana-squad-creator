@@ -21,6 +21,7 @@ components:
     - squad-cc-creator.md
     - squad-skills-scout.md
     - squad-publisher.md
+    - squad-orchestrator.md
   tasks:
     - analyze-requirements.md
     - create-agents.md

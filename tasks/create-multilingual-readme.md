@@ -5,52 +5,52 @@ responsavel_type: Agente
 atomic_layer: Organism
 
 Entrada:
-  - campo: analysisMd
+  - nome: analysisMd
     tipo: file
-    origen: "analyzeRequirements() task output"
+    descricao: "analyzeRequirements() task output"
     obrigatorio: true
-  - campo: squadYaml
+  - nome: squadYaml
     tipo: file
-    origen: "createWorkflows() task output"
+    descricao: "createWorkflows() task output"
     obrigatorio: true
-  - campo: agentFiles
+  - nome: agentFiles
     tipo: array<file>
-    origen: "createAgents() task output (pós-otimização)"
+    descricao: "createAgents() task output (pós-otimização)"
     obrigatorio: true
-  - campo: taskFiles
+  - nome: taskFiles
     tipo: array<file>
-    origen: "createTasks() task output (pós-otimização)"
+    descricao: "createTasks() task output (pós-otimização)"
     obrigatorio: true
-  - campo: workflowFiles
+  - nome: workflowFiles
     tipo: array<file>
-    origen: "createWorkflows() task output (pós-otimização)"
+    descricao: "createWorkflows() task output (pós-otimização)"
     obrigatorio: true
 
 Saida:
-  - campo: readmePtBr
+  - nome: readmePtBr
     tipo: file
-    destino: "deploy workspace (README.md)"
-    persistido: true
-  - campo: readmeEn
+    descricao: "deploy workspace (README.md)"
+    obrigatorio: true
+  - nome: readmeEn
     tipo: file
-    destino: "deploy workspace (README.en.md)"
-    persistido: true
-  - campo: readmeZh
+    descricao: "deploy workspace (README.en.md)"
+    obrigatorio: true
+  - nome: readmeZh
     tipo: file
-    destino: "deploy workspace (README.zh.md)"
-    persistido: true
-  - campo: readmeHi
+    descricao: "deploy workspace (README.zh.md)"
+    obrigatorio: true
+  - nome: readmeHi
     tipo: file
-    destino: "deploy workspace (README.hi.md)"
-    persistido: true
-  - campo: readmeEs
+    descricao: "deploy workspace (README.hi.md)"
+    obrigatorio: true
+  - nome: readmeEs
     tipo: file
-    destino: "deploy workspace (README.es.md)"
-    persistido: true
-  - campo: readmeAr
+    descricao: "deploy workspace (README.es.md)"
+    obrigatorio: true
+  - nome: readmeAr
     tipo: file
-    destino: "deploy workspace (README.ar.md)"
-    persistido: true
+    descricao: "deploy workspace (README.ar.md)"
+    obrigatorio: true
 
 Checklist:
   pre-conditions:

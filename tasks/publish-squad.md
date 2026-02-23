@@ -5,28 +5,28 @@ responsavel_type: Agente
 atomic_layer: Molecule
 
 Entrada:
-  - campo: squadDir
+  - nome: squadDir
     tipo: file
-    origen: "squads/<nome>/ ou repositório local"
+    descricao: "squads/<nome>/ ou repositório local"
     obrigatorio: true
-  - campo: squadYaml
+  - nome: squadYaml
     tipo: file
-    origen: "squadDir/squad.yaml"
+    descricao: "squadDir/squad.yaml"
     obrigatorio: true
-  - campo: userConfirmation
+  - nome: userConfirmation
     tipo: boolean
-    origen: "user input (AskUserQuestion)"
+    descricao: "user input (AskUserQuestion)"
     obrigatorio: true
 
 Saida:
-  - campo: publishResult
+  - nome: publishResult
     tipo: object
-    destino: "user notification"
-    persistido: false
-  - campo: marketplaceUrl
+    descricao: "user notification"
+    obrigatorio: false
+  - nome: marketplaceUrl
     tipo: string
-    destino: "user notification"
-    persistido: false
+    descricao: "user notification"
+    obrigatorio: false
 
 Checklist:
   pre-conditions:

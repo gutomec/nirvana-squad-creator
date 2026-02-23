@@ -5,20 +5,20 @@ responsavel_type: Agente
 atomic_layer: Organism
 
 Entrada:
-  - campo: allGeneratedFiles
+  - nome: allGeneratedFiles
     tipo: array<file>
-    origen: "optimizeSquad() task output (modifiedFiles + unmodified)"
+    descricao: "optimizeSquad() task output (modifiedFiles + unmodified)"
     obrigatorio: true
-  - campo: allReferences
+  - nome: allReferences
     tipo: array<file>
-    origen: "references/*.md (agent-format, task-format, workflow-format, squad-yaml-schema, config-format)"
+    descricao: "references/*.md (agent-format, task-format, workflow-format, squad-yaml-schema, config-format)"
     obrigatorio: true
 
 Saida:
-  - campo: validationReportMd
+  - nome: validationReportMd
     tipo: file
-    destino: "createMultilingualReadme() task (se PASSED) ou orquestrador (se FAILED)"
-    persistido: true
+    descricao: "createMultilingualReadme() task (se PASSED) ou orquestrador (se FAILED)"
+    obrigatorio: true
 
 Checklist:
   pre-conditions:

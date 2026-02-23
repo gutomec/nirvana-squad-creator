@@ -5,48 +5,48 @@ responsavel_type: Agente
 atomic_layer: Organism
 
 Entrada:
-  - campo: analysisMd
+  - nome: analysisMd
     tipo: file
-    origen: "analyzeRequirements() task output"
+    descricao: "analyzeRequirements() task output"
     obrigatorio: true
-  - campo: componentRegistryMd
+  - nome: componentRegistryMd
     tipo: file
-    origen: "analyzeRequirements() task output"
+    descricao: "analyzeRequirements() task output"
     obrigatorio: true
-  - campo: agentFiles
+  - nome: agentFiles
     tipo: array<file>
-    origen: "createAgents() task output"
+    descricao: "createAgents() task output"
     obrigatorio: true
-  - campo: taskFiles
+  - nome: taskFiles
     tipo: array<file>
-    origen: "createTasks() task output"
+    descricao: "createTasks() task output"
     obrigatorio: true
-  - campo: allTemplates
+  - nome: allTemplates
     tipo: array<file>
-    origen: "templates/*.md (squad.yaml, workflow, config templates)"
+    descricao: "templates/*.md (squad.yaml, workflow, config templates)"
     obrigatorio: true
-  - campo: allReferences
+  - nome: allReferences
     tipo: array<file>
-    origen: "references/*.md (workflow-format, squad-yaml-schema, config-format)"
+    descricao: "references/*.md (workflow-format, squad-yaml-schema, config-format)"
     obrigatorio: true
 
 Saida:
-  - campo: workflowFiles
+  - nome: workflowFiles
     tipo: array<file>
-    destino: "optimizeSquad() task"
-    persistido: true
-  - campo: squadYaml
+    descricao: "optimizeSquad() task"
+    obrigatorio: true
+  - nome: squadYaml
     tipo: file
-    destino: "optimizeSquad() task + validateSquad() task"
-    persistido: true
-  - campo: configFiles
+    descricao: "optimizeSquad() task + validateSquad() task"
+    obrigatorio: true
+  - nome: configFiles
     tipo: array<file>
-    destino: "optimizeSquad() task"
-    persistido: true
-  - campo: readmeMd
+    descricao: "optimizeSquad() task"
+    obrigatorio: true
+  - nome: readmeMd
     tipo: file
-    destino: "optimizeSquad() task"
-    persistido: true
+    descricao: "optimizeSquad() task"
+    obrigatorio: true
 
 Checklist:
   pre-conditions:

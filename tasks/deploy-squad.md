@@ -1,28 +1,28 @@
 ---
 task: deploySquad()
-responsavel: "Orquestrador"
+responsavel: "Orchestrator"
 responsavel_type: Agente
 atomic_layer: Organism
 
 Entrada:
-  - campo: allWorkspaceFiles
+  - nome: allWorkspaceFiles
     tipo: array<file>
-    origen: ".squad-workspace/<session>/ (todos os artefatos gerados e validados)"
+    descricao: ".squad-workspace/<session>/ (todos os artefatos gerados e validados)"
     obrigatorio: true
-  - campo: targetProject
+  - nome: targetProject
     tipo: string
-    origen: "user input (AskUserQuestion)"
+    descricao: "user input (AskUserQuestion)"
     obrigatorio: true
 
 Saida:
-  - campo: deployedSquadDir
+  - nome: deployedSquadDir
     tipo: file
-    destino: "createCcSkill() task"
-    persistido: true
-  - campo: enabledCommands
+    descricao: "createCcSkill() task"
+    obrigatorio: true
+  - nome: enabledCommands
     tipo: array<string>
-    destino: "user notification"
-    persistido: false
+    descricao: "user notification"
+    obrigatorio: false
 
 Checklist:
   pre-conditions:

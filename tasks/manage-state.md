@@ -1,32 +1,32 @@
 ---
 task: manageState()
-responsavel: "Orquestrador"
+responsavel: "Orchestrator"
 responsavel_type: Agente
 atomic_layer: Molecule
 
 Entrada:
-  - campo: sessionName
+  - nome: sessionName
     tipo: string
-    origen: "user input ou --resume flag"
+    descricao: "user input ou --resume flag"
     obrigatorio: true
-  - campo: phaseNumber
+  - nome: phaseNumber
     tipo: string
-    origen: "pipeline progress"
+    descricao: "pipeline progress"
     obrigatorio: false
-  - campo: notes
+  - nome: notes
     tipo: string
-    origen: "phase completion notes"
+    descricao: "phase completion notes"
     obrigatorio: false
 
 Saida:
-  - campo: stateJson
+  - nome: stateJson
     tipo: object
-    destino: "all pipeline phases (state tracking)"
-    persistido: true
-  - campo: stateMd
+    descricao: "all pipeline phases (state tracking)"
+    obrigatorio: true
+  - nome: stateMd
     tipo: file
-    destino: ".squad-workspace/<session>/STATE.md"
-    persistido: true
+    descricao: ".squad-workspace/<session>/STATE.md"
+    obrigatorio: true
 
 Checklist:
   pre-conditions:

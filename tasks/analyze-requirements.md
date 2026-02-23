@@ -5,20 +5,20 @@ responsavel_type: Agente
 atomic_layer: Organism
 
 Entrada:
-  - campo: userObjective
+  - nome: userObjective
     tipo: string
-    origen: "input do usuário (linguagem natural)"
+    descricao: "input do usuário (linguagem natural)"
     obrigatorio: true
 
 Saida:
-  - campo: analysisMd
+  - nome: analysisMd
     tipo: file
-    destino: "createAgents() task"
-    persistido: true
-  - campo: componentRegistryMd
+    descricao: "createAgents() task"
+    obrigatorio: true
+  - nome: componentRegistryMd
     tipo: file
-    destino: "createAgents() task + createTasks() task + createWorkflows() task"
-    persistido: true
+    descricao: "createAgents() task + createTasks() task + createWorkflows() task"
+    obrigatorio: true
 
 Checklist:
   pre-conditions:

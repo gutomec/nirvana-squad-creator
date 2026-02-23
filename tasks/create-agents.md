@@ -5,32 +5,32 @@ responsavel_type: Agente
 atomic_layer: Organism
 
 Entrada:
-  - campo: analysisMd
+  - nome: analysisMd
     tipo: file
-    origen: "analyzeRequirements() task output"
+    descricao: "analyzeRequirements() task output"
     obrigatorio: true
-  - campo: componentRegistryMd
+  - nome: componentRegistryMd
     tipo: file
-    origen: "analyzeRequirements() task output"
+    descricao: "analyzeRequirements() task output"
     obrigatorio: true
-  - campo: agentTemplateMd
+  - nome: agentTemplateMd
     tipo: file
-    origen: "templates/agent.template.md"
+    descricao: "templates/agent.template.md"
     obrigatorio: true
-  - campo: agentFormatMd
+  - nome: agentFormatMd
     tipo: file
-    origen: "references/agent-format.md"
+    descricao: "references/agent-format.md"
     obrigatorio: true
 
 Saida:
-  - campo: agentFiles
+  - nome: agentFiles
     tipo: array<file>
-    destino: "optimizeSquad() task + createTasks() task"
-    persistido: true
-  - campo: ideationMd
+    descricao: "optimizeSquad() task + createTasks() task"
+    obrigatorio: true
+  - nome: ideationMd
     tipo: file
-    destino: "optimizeSquad() task"
-    persistido: true
+    descricao: "optimizeSquad() task"
+    obrigatorio: true
 
 Checklist:
   pre-conditions:

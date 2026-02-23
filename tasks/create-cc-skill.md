@@ -5,28 +5,28 @@ responsavel_type: Agente
 atomic_layer: Organism
 
 Entrada:
-  - campo: allWorkspaceFiles
+  - nome: allWorkspaceFiles
     tipo: array<file>
-    origen: ".squad-workspace/<session>/ (todos os artefatos gerados)"
+    descricao: ".squad-workspace/<session>/ (todos os artefatos gerados)"
     obrigatorio: true
-  - campo: ccSkillFormatMd
+  - nome: ccSkillFormatMd
     tipo: file
-    origen: "references/cc-skill-format.md"
+    descricao: "references/cc-skill-format.md"
     obrigatorio: true
-  - campo: targetProject
+  - nome: targetProject
     tipo: string
-    origen: "deploySquad() task output (caminho do projeto destino)"
+    descricao: "deploySquad() task output (caminho do projeto destino)"
     obrigatorio: true
 
 Saida:
-  - campo: ccSkillDir
+  - nome: ccSkillDir
     tipo: file
-    destino: "cc-skills/<nome>/ (diretório completo do CC Skill)"
-    persistido: true
-  - campo: ccSkillReportMd
+    descricao: "cc-skills/<nome>/ (diretório completo do CC Skill)"
+    obrigatorio: true
+  - nome: ccSkillReportMd
     tipo: file
-    destino: "discoverSkills() task"
-    persistido: true
+    descricao: "discoverSkills() task"
+    obrigatorio: true
 
 Checklist:
   pre-conditions:

@@ -5,20 +5,20 @@ responsavel_type: Agente
 atomic_layer: Organism
 
 Entrada:
-  - campo: allGeneratedFiles
+  - nome: allGeneratedFiles
     tipo: array<file>
-    origen: "createAgents() + createTasks() + createWorkflows() task outputs"
+    descricao: "createAgents() + createTasks() + createWorkflows() task outputs"
     obrigatorio: true
 
 Saida:
-  - campo: optimizationReportMd
+  - nome: optimizationReportMd
     tipo: file
-    destino: "validateSquad() task"
-    persistido: true
-  - campo: modifiedFiles
+    descricao: "validateSquad() task"
+    obrigatorio: true
+  - nome: modifiedFiles
     tipo: array<file>
-    destino: "validateSquad() task"
-    persistido: true
+    descricao: "validateSquad() task"
+    obrigatorio: true
 
 Checklist:
   pre-conditions:
