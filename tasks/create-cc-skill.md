@@ -120,7 +120,7 @@ A task `createCcSkill()` é a **nona fase** do pipeline. Transforma o squad AIOS
    | `config/tech-stack.md` + domínio | `.claude/rules/*.md` | Rules específicas do domínio |
    | `squad.yaml` + `README.md` | `CLAUDE.md` + `.claude/settings.json` | Documentação + config |
 
-2. **Geração do SKILL.md** — Orquestrador do CC Skill:
+2. **Geração do SKILL.md** — Orchestrator do CC Skill:
    - Converter workflows AIOS em pipeline de fases
    - Cada fase referencia um skill agent via `Task` spawn
    - Definir inputs/outputs por fase

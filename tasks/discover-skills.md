@@ -94,7 +94,7 @@ Metadata:
                    │
                    ▼
           ┌──────────────────────┐
-          │ Orquestrador         │
+          │ Orchestrator         │
           │ (instalação          │
           │  interativa com      │
           │  aprovação do        │

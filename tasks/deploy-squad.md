@@ -83,7 +83,7 @@ Metadata:
                         │
                         ▼
                ┌─────────────────┐
-               │  Orquestrador    │
+               │  Orchestrator    │
                │  (deploy logic)  │
                └────────┬─────────┘
                         │

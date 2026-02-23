@@ -97,7 +97,7 @@ Metadata:
                     │
                     ▼
            ┌─────────────────┐
-           │  Orquestrador    │
+           │  Orchestrator    │
            │  (state mgmt)    │
            └────────┬─────────┘
                     │
