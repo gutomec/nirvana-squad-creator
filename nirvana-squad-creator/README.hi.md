@@ -5,7 +5,7 @@
 ## इंस्टॉलेशन
 
 ```bash
-npx squads add gutomec/nirvana-squad-creator
+npx squads add gutomec/squads-sh-aios/nirvana-squad-creator
 ```
 
 ## यह क्या करता है

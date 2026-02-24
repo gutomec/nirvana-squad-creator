@@ -5,7 +5,7 @@
 ## Instalação
 
 ```bash
-npx squads add gutomec/nirvana-squad-creator
+npx squads add gutomec/squads-sh-aios/nirvana-squad-creator
 ```
 
 ## O que Faz
