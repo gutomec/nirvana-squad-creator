@@ -19,7 +19,7 @@ This file lives at the root of the squad directory and is the entry point for AI
 |-------|------|-------------|-------------|
 | `name` | string | Squad identifier | kebab-case, unique across squads |
 | `version` | string | Squad version | Semantic versioning (e.g., `1.0.0`) |
-| `description` | string | What this squad does | Free text, concise |
+| `description` | string | What this squad does | Free text, concise. **MUST be inline quoted string** — never use YAML multi-line (`\|` or `>`), which is parsed as `object,object` by the AIOS validator |
 | `aios` | object | AIOS compatibility block | Contains `minVersion` and `type` |
 | `aios.minVersion` | string | Minimum AIOS Core version required | Semantic versioning (e.g., `2.1.0`) |
 | `aios.type` | string | Component type | Always `"squad"` |
@@ -156,6 +156,7 @@ All file paths are relative to the squad root directory. Every file listed in `c
 - `config.extends` is one of: `extend`, `override`, `none`
 - Squad dependency references in `dependencies.squads` use semver range format (`"name@^version"`)
 - `slashPrefix` is a short, kebab-case string without special characters
+- **`description` MUST be an inline quoted string** — never use YAML multi-line block scalars (`|` or `>`). The AIOS parser does not validate multi-line blocks and interprets them as `object,object` instead of string. Always use: `description: "concise text on a single line"`
 
 ---
 

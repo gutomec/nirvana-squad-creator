@@ -78,3 +78,4 @@ Schema completo com todos os campos, tipos, e restricoes: [references/squad-yaml
 3. `aios.type` sempre `"squad"`
 4. Todos os arquivos listados em `components` existem no diretorio do squad
 5. `config.extends` e um dos valores: `extend`, `override`, `none`
+6. **`description` DEVE ser string inline entre aspas** — NUNCA usar YAML multi-line (`|` ou `>`). O parser AIOS não valida blocos multi-line e interpreta como `object,object` em vez de string. Sempre usar: `description: "texto conciso em uma linha"`

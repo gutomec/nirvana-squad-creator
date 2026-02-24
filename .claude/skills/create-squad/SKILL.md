@@ -259,6 +259,8 @@ Outputs: workflows/*.yaml, squad.yaml, config/ (coding-standards.md, tech-stack.
 
 **IMPORTANTE:** Gere squad.yaml POR ÚLTIMO para garantir consistência com os componentes gerados.
 
+**REGRA YAML:** Todos os campos `description` em squad.yaml e workflows DEVEM ser strings inline entre aspas duplas em uma única linha. NUNCA use YAML multi-line (`|` ou `>`). O parser AIOS não valida blocos multi-line e interpreta como `object,object`. Exemplo correto: `description: "texto conciso em uma linha"`.
+
 ### Validar e avançar
 
 ```bash

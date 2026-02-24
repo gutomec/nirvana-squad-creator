@@ -18,7 +18,7 @@ A workflow definition is a YAML file (`.yaml`) that describes an ordered sequenc
 | Field | Type | Description |
 |-------|------|-------------|
 | `workflow_name` | string | Unique workflow identifier (snake_case) |
-| `description` | string | Human-readable summary of the workflow's purpose |
+| `description` | string | Human-readable summary of the workflow's purpose. **MUST be inline quoted string** — never use YAML multi-line (`\|` or `>`), parsed as `object,object` by AIOS |
 | `agent_sequence` | array | Ordered list of agent IDs involved in this workflow |
 | `key_commands` | array | Slash commands that trigger this workflow (e.g., `*develop-story`) |
 | `trigger_threshold` | integer | Number of trigger signals needed before auto-activation (default: 2) |
