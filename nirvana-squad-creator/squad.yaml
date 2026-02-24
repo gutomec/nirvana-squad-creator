@@ -34,7 +34,9 @@ components:
   workflows:
     - squad-generation-pipeline.yaml
     - squad-publish-flow.yaml
-  checklists: []
+  checklists:
+    - squad-generation-quality-gate.md
+    - pre-publish-checklist.md
   templates:
     - agent.template.md
     - task.template.md
