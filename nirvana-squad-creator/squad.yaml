@@ -1,6 +1,6 @@
 name: nirvana-squad-creator
 version: 1.0.0
-description: "Gera squads AIOS otimizados a partir de linguagem natural — pipeline de 11 fases com análise, geração, otimização, validação, README multi-idioma, deploy, CC Skill e publicação no squads.sh"
+description: "Gera squads AIOS otimizados a partir de linguagem natural — pipeline de 9 fases com análise, geração, otimização, validação, README multi-idioma, deploy e publicação no squads.sh"
 author: "Luiz Gustavo Vieira Rodrigues <@gutomec>"
 license: MIT
 slashPrefix: nsc
@@ -18,8 +18,6 @@ components:
     - squad-optimizer.md
     - squad-validator.md
     - squad-readme-creator.md
-    - squad-cc-creator.md
-    - squad-skills-scout.md
     - squad-publisher.md
     - squad-orchestrator.md
   tasks:
@@ -31,8 +29,6 @@ components:
     - validate-squad.md
     - create-multilingual-readme.md
     - deploy-squad.md
-    - create-cc-skill.md
-    - discover-skills.md
     - publish-squad.md
     - manage-state.md
   workflows:
@@ -44,7 +40,6 @@ components:
     - task.template.md
     - workflow.template.md
     - squad-yaml.template.md
-    - cc-skill.template.md
   tools: []
   scripts:
     - squad-tools.cjs

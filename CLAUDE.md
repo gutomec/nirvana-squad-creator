@@ -14,9 +14,11 @@ Dado um objetivo em linguagem natural, gerar o squad AIOS mais otimizado possive
 | 4 | Workflow Creator | Gera workflows com transitions e seleção de pattern | Opus |
 | 5 | Optimizer | Elimina redundâncias (AgentDropout), otimiza model routing | Opus |
 | 6 | Validator | Valida estrutura, cross-references, campos obrigatórios | Sonnet |
-| 7 | Deploy | Deploya squad em projeto AIOS (novo ou existente) e habilita slash commands | Orquestrador |
+| 7 | README Creator | Gera READMEs em 6 idiomas (PT-BR + en, zh, hi, es, ar) | Opus |
+| 8 | Deploy | Deploya squad em projeto AIOS (novo ou existente) e habilita slash commands | Orquestrador |
+| 9 | Publisher | Guia publicação no squads.sh marketplace (opcional) | Orquestrador |
 
-Fluxo: Input --> Analyzer --> Agent Creator --> Task Creator --> Workflow Creator --> Optimizer --> Validator --> Deploy + Habilitação
+Fluxo: Input --> Analyzer --> Agent Creator --> Task Creator --> Workflow Creator --> Optimizer --> Validator --> README Creator --> Deploy + Habilitação --> Publisher (opcional)
 
 ## Formatos AIOS -- Referencia Rapida
 
@@ -88,7 +90,7 @@ Referencia completa: `.claude/skills/create-squad/references/config-format.md`
 
 ## Deploy e Habilitação de Squads
 
-Após a geração e validação do squad (Fases 1-6), a Fase 7 faz o deploy em um projeto AIOS e habilita os slash commands no Claude Code.
+Após a geração, validação e READMEs do squad (Fases 1-7), a Fase 8 faz o deploy em um projeto AIOS e habilita os slash commands no Claude Code.
 
 ### Opções de Deploy
 
@@ -99,15 +101,15 @@ Após a geração e validação do squad (Fases 1-6), a Fase 7 faz o deploy em u
 
 ### Mecanismo de Habilitação de Slash Commands
 
-O AIOS Core registra slash commands no Claude Code via a estrutura `.claude/commands/{prefix}/agents/`. O processo:
+O AIOS Core registra slash commands no Claude Code via a estrutura `.claude/commands/SQUADS/{prefix}/`. O processo:
 
-1. Ler `slashPrefix` do `squad.yaml` (ex: `ds` → commands ficam em `/ds:agents:*`)
-2. Copiar agents do squad para `.claude/commands/{prefix}/agents/`
+1. Ler `slashPrefix` do `squad.yaml` (ex: `ds` → commands ficam em `/SQUADS:ds:*`)
+2. Copiar agents do squad para `.claude/commands/SQUADS/{prefix}/`
 3. Criar/atualizar `.aios-sync.yaml` na raiz do projeto com o alias do squad
 
 Após isso, o Claude Code reconhece os comandos automaticamente:
 ```
-/{prefix}:agents:{agent-id}   → Ativa o agente correspondente
+/SQUADS:{prefix}:{agent-id}   → Ativa o agente correspondente
 ```
 
 ### Estrutura de Deploy
@@ -116,9 +118,12 @@ Após isso, o Claude Code reconhece os comandos automaticamente:
 <projeto-aios>/
 ├── .aios-core/                    # AIOS Core (já existente ou recém-instalado)
 ├── .claude/
+│   ├── squads/
+│   │   └── <nome>/agents/             # ← Agentes instalados (IDE path)
 │   └── commands/
 │       ├── AIOS/agents/           # Agentes core do AIOS
-│       └── <prefix>/agents/       # ← Agentes do squad (habilitados aqui)
+│       └── SQUADS/<prefix>/       # ← Slash commands habilitados
+├── .squad-lock.json                   # ← Registro de squads instalados
 ├── .aios-sync.yaml                # ← Mapeamento squad → prefix
 └── squads/
     └── <nome-do-squad>/           # ← Squad deployado aqui
@@ -138,22 +143,47 @@ Arquivo de configuração que mapeia squads para prefixos de slash commands:
 active_ides:
   - claude
 squad_aliases:
-  meu-squad: ms        # /ms:agents:*
-  outro-squad: os       # /os:agents:*
+  meu-squad: ms        # /SQUADS:ms:*
+  outro-squad: os       # /SQUADS:os:*
 sync_mappings:
   squad_agents:
     source: 'squads/*/agents/'
     destinations:
       claude:
-        - path: '.claude/commands/{squad_alias}/agents/'
+        - path: '.claude/commands/SQUADS/{squad_alias}/'
           format: 'md'
 ```
 
 Para re-sincronizar manualmente após editar agentes:
 ```bash
 # Copiar agents atualizados para .claude/commands/
-cp squads/<nome>/agents/*.md .claude/commands/<prefix>/agents/
+cp squads/<nome>/agents/*.md .claude/commands/SQUADS/<prefix>/
 ```
+
+## Auto-Melhoria do Squad Creator
+
+O skill `/improve-squad-creator` opera **independente** do pipeline de geração. Ele busca skills que melhorem o próprio Squad Creator — não os squads gerados.
+
+### Uso
+
+```bash
+/improve-squad-creator                    # Busca geral
+/improve-squad-creator --domain=validation  # Foco em validação
+```
+
+### Fluxo
+
+1. Escaneia capacidades atuais do Squad Creator (agentes, templates, references)
+2. Identifica gaps e áreas de melhoria
+3. Busca skills via API Skyll
+4. Apresenta relatório com recomendações
+5. Instala skills aprovados pelo usuário (via `npx skills add`)
+6. Sugere integrações (sem auto-modificar arquivos)
+
+### Agente
+
+- **self-improvement-scout** — Busca e avalia skills para auto-melhoria
+- Localização: `.claude/skills/improve-squad-creator/agents/self-improvement-scout.md`
 
 ## Convenções
 
@@ -175,7 +205,7 @@ node bin/squad-tools.cjs resume <session>
 node bin/squad-tools.cjs state get <session>
 node bin/squad-tools.cjs state advance <session> --phase=N [--notes="..."]
 node bin/squad-tools.cjs state gate <session> --phase=N --result=approved
-node bin/squad-tools.cjs validate <session> --phase=N
+node bin/squad-tools.cjs validate <session> --phase=N    # Fases válidas: 1-9
 node bin/squad-tools.cjs snapshot <session>
 ```
 
@@ -184,9 +214,21 @@ nirvana-squad-creator/
 ├── CLAUDE.md
 ├── bin/squad-tools.cjs
 ├── .claude/skills/create-squad/
-│   ├── SKILL.md            # Orquestrador (Fases 0-7)
+│   ├── SKILL.md            # Orquestrador (Fases 0-9)
 │   ├── templates/          # Templates anotados (squad.yaml, agent, task, workflow)
 │   └── references/         # Specs completas por formato (5 docs)
+├── .claude/skills/improve-squad-creator/
+│   ├── SKILL.md            # Orquestrador de auto-melhoria
+│   └── agents/             # self-improvement-scout
+├── .claude/agents/
+│   ├── squad-analyzer.md
+│   ├── squad-agent-creator.md
+│   ├── squad-task-creator.md
+│   ├── squad-workflow-creator.md
+│   ├── squad-optimizer.md
+│   ├── squad-validator.md
+│   ├── squad-readme-creator.md # Fase 7
+│   └── squad-publisher.md      # Fase 9
 └── .squad-workspace/       # Runtime workspace (gitignored)
     └── <session>/
         ├── config.json     # Estado da sessão
@@ -199,15 +241,18 @@ nirvana-squad-creator/
 # Output (projeto AIOS destino -- novo ou existente):
 <projeto-aios>/
 ├── .aios-core/             # AIOS Core framework
-├── .claude/commands/<prefix>/agents/  # Slash commands habilitados
+├── .claude/
+│   ├── squads/<nome>/agents/   # Agentes instalados (IDE path)
+│   └── commands/SQUADS/<prefix>/  # Slash commands habilitados
+├── .squad-lock.json        # Registro de squads instalados
 ├── .aios-sync.yaml         # Mapeamento squad → prefix
-└── squads/<nome>/          # Squad deployado
-    ├── agents/*.md
-    ├── tasks/*.md
-    ├── workflows/*.yaml
-    ├── config/*.md
-    ├── squad.yaml
-    └── README.md
+├── squads/<nome>/          # Squad AIOS deployado
+│   ├── agents/*.md
+│   ├── tasks/*.md
+│   ├── workflows/*.yaml
+│   ├── config/*.md
+│   ├── squad.yaml
+│   └── README.md
 ```
 
 ## Links
@@ -216,3 +261,21 @@ nirvana-squad-creator/
 - References: `.claude/skills/create-squad/references/`
 - CLI Tool: `bin/squad-tools.cjs`
 - Workspace: `.squad-workspace/` (gitignored)
+
+## AIOS Squad Package
+
+O Nirvana Squad Creator também existe como squad AIOS publicável em `squads/nirvana-squad-creator/`.
+
+```
+squads/nirvana-squad-creator/
+├── agents/          # 9 agentes AIOS
+├── tasks/           # 10 tasks com contratos
+├── workflows/       # 2 workflows
+├── config/          # 3 config files
+├── scripts/         # squad-tools.cjs
+├── templates/       # 4 templates
+├── references/      # 5 referências
+├── squad.yaml       # Manifesto
+├── README.md        # PT-BR (+ 5 traduções)
+└── README.*.md      # en, zh, hi, es, ar
+```

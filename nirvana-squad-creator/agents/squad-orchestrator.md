@@ -80,7 +80,7 @@ dependencies:
 - **Todas as fases**: Notificações de conclusão para avanço de estado
 
 ## Hands Off To
-- **CC Creator (Fase 9)**: Squad deployado no projeto destino (`deployedSquadDir`)
+- **Publisher (Fase 9)**: Squad deployado no projeto destino, pronto para publicação opcional
 - **Usuário**: Slash commands habilitados e funcionais
 
 ## Shared Artifacts
@@ -96,7 +96,7 @@ O Orchestrator executa o deploy em 5 etapas:
 
 1. **Determinar tipo de deploy** — Novo projeto AIOS ou projeto existente
 2. **Copiar artefatos** — Do workspace para `squads/<nome>/` no projeto destino
-3. **Habilitar slash commands** — Copiar agents para `.claude/commands/<prefix>/agents/`
+3. **Habilitar slash commands** — Copiar agents para `.claude/commands/SQUADS/<prefix>/`
 4. **Criar .aios-sync.yaml** — Mapear squad para prefixo de slash commands
 5. **Verificar** — Confirmar que todos os arquivos estão no destino
 

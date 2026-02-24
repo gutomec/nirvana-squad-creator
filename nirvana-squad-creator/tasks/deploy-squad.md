@@ -17,7 +17,7 @@ Entrada:
 Saida:
   - nome: deployedSquadDir
     tipo: file
-    descricao: "createCcSkill() task"
+    descricao: "publishSquad() task (se publicação for solicitada)"
     obrigatorio: true
   - nome: enabledCommands
     tipo: array<string>
@@ -34,7 +34,7 @@ Checklist:
   post-conditions:
     - "[ ] Squad copiado para squads/<nome>/ no projeto destino"
     - "[ ] Estrutura completa: agents/, tasks/, workflows/, config/, squad.yaml, README*.md"
-    - "[ ] Slash commands habilitados em .claude/commands/<prefix>/agents/"
+    - "[ ] Slash commands habilitados em .claude/commands/SQUADS/<prefix>/"
     - "[ ] .aios-sync.yaml criado/atualizado na raiz do projeto"
     - "[ ] Se projeto novo: npx aios-core init executado (ou setup manual se não-interativo)"
 
@@ -121,9 +121,9 @@ A task `deploySquad()` é a **oitava fase** do pipeline. Deploya o squad validad
 
 3. **Habilitar Slash Commands** — Mecanismo de habilitação:
    - Ler `slashPrefix` do `squad.yaml` (ex: `nsc` para Nirvana Squad Creator)
-   - Criar diretório `.claude/commands/<prefix>/agents/`
+   - Criar diretório `.claude/commands/SQUADS/<prefix>/`
    - Copiar cada agent `.md` para o diretório de commands
-   - Após isso, Claude Code reconhece `/<prefix>:agents:<agent-id>`
+   - Após isso, Claude Code reconhece `/SQUADS:<prefix>:<agent-id>`
 
 4. **Criar/Atualizar .aios-sync.yaml** — Arquivo de mapeamento:
    ```yaml
@@ -136,7 +136,7 @@ A task `deploySquad()` é a **oitava fase** do pipeline. Deploya o squad validad
        source: 'squads/*/agents/'
        destinations:
          claude:
-           - path: '.claude/commands/{squad_alias}/agents/'
+           - path: '.claude/commands/SQUADS/{squad_alias}/'
              format: 'md'
    ```
 
@@ -157,6 +157,6 @@ A task `deploySquad()` é a **oitava fase** do pipeline. Deploya o squad validad
 
 Após o deploy, verificar:
 - Todos os arquivos copiados existem no destino
-- `.claude/commands/<prefix>/agents/` contém os agents
+- `.claude/commands/SQUADS/<prefix>/` contém os agents
 - `.aios-sync.yaml` contém o mapeamento correto
 - Listar slash commands habilitados para o usuário

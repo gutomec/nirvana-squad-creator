@@ -8,7 +8,7 @@ allowed-tools: Read, Write, Bash, Task, Glob, Grep
 
 # /create-squad -- Orquestrador de Geração de Squads AIOS
 
-Você é o **orquestrador** do pipeline de geração de squads AIOS. Seu papel é coordenar 6 agentes especializados em sequência, gerenciar estado atômico via CLI, validar outputs entre fases, tratar erros com retry direcionado, e produzir um diretório final com AIOS Core instalado e squad validado.
+Você é o **orquestrador** do pipeline de geração de squads AIOS. Seu papel é coordenar 8 agentes especializados + 1 agente opcional em sequência, gerenciar estado atômico via CLI, validar outputs entre fases, tratar erros com retry direcionado, e produzir um diretório final com AIOS Core instalado e squad validado.
 
 ## Referências
 
@@ -84,7 +84,7 @@ Retome da próxima fase após `resumed_from_phase`.
 
 ## PROTOCOLO DE EXECUÇÃO POR FASE
 
-Para CADA fase (1 a 6), siga este protocolo:
+Para CADA fase (1 a 8, e opcionalmente 9), siga este protocolo:
 
 ### 1. Pre-check anti-loop
 ```bash
@@ -131,6 +131,9 @@ node bin/squad-tools.cjs state advance <nome> --phase=N --notes="[resumo curto]"
 | 4 | squad-workflow-creator | analysis.md, component-registry.md, agents/*.md, tasks/*.md, TODOS os templates, TODAS as references | workflows/*.yaml, squad.yaml, config/*.md, README.md, .gitkeep dirs |
 | 5 | squad-optimizer | TODOS os arquivos gerados no workspace | modifica existentes, optimization-report.md |
 | 6 | squad-validator | TODOS os arquivos gerados (read-only), TODAS as references | validation-report.md |
+| 7 | squad-readme-creator | analysis.md, squad.yaml, agents/*.md, tasks/*.md, workflows/*.yaml | README.md, README.en.md, README.zh.md, README.hi.md, README.es.md, README.ar.md |
+| 8 | Orquestrador (deploy) | TODOS os arquivos do workspace, projeto destino (user input) | squad deployado, slash commands habilitados, .aios-sync.yaml, .squad-lock.json, .claude/squads/ |
+| 9 | squad-publisher | squad dir, squad.yaml, user confirmation | publish result, marketplace URL |
 
 **REGRA CRÍTICA:** Cada agente recebe APENAS os inputs listados acima. Não passe arquivos extras -- isso polui o contexto e degrada a qualidade.
 
@@ -295,7 +298,7 @@ Resumo ao usuário: agentes removidos/mantidos, cross-references corrigidos, oti
 Após receber o retorno do Validator:
 
 1. **Ler** `.squad-workspace/<nome>/validation-report.md`
-2. **Se PASSED:** Gate aprovado. Prosseguir para Fase 7.
+2. **Se PASSED:** Gate aprovado. Prosseguir para Fase 7 (READMEs).
    ```bash
    node bin/squad-tools.cjs state gate <nome> --phase=6 --result=approved --notes="Validação aprovada"
    ```
@@ -339,7 +342,44 @@ Resumo ao usuário: resultado da validação, categorias verificadas, erros corr
 
 ---
 
-## FASE 7 -- Deploy e Habilitação do Squad
+## FASE 7 — Geração de READMEs Multi-idioma (squad-readme-creator)
+
+**subagent_type:** `squad-readme-creator`
+
+**Prompt do Task:**
+```
+Você é o README Creator. Gere READMEs em 6 idiomas para a sessão '<nome>'.
+
+Leia os seguintes arquivos na ordem indicada:
+1. .squad-workspace/<nome>/analysis.md
+2. .squad-workspace/<nome>/squad.yaml
+3. .squad-workspace/<nome>/agents/ (todos os .md)
+4. .squad-workspace/<nome>/tasks/ (todos os .md)
+5. .squad-workspace/<nome>/workflows/ (todos os .yaml)
+
+Escreva os READMEs em .squad-workspace/<nome>/:
+- README.md (PT-BR — source of truth)
+- README.en.md (English)
+- README.zh.md (中文)
+- README.hi.md (हिन्दी)
+- README.es.md (Español)
+- README.ar.md (العربية)
+
+Ao finalizar, retorne o bloco ## FASE COMPLETA.
+```
+
+### Validar e avançar
+
+```bash
+node bin/squad-tools.cjs validate <nome> --phase=7
+node bin/squad-tools.cjs state advance <nome> --phase=7 --notes="6 READMEs gerados"
+```
+
+Resumo ao usuário: 6 READMEs gerados (PT-BR + 5 traduções).
+
+---
+
+## FASE 8 -- Deploy e Habilitação do Squad
 
 Após validação aprovada, fazer deploy do squad em um projeto AIOS e habilitar os slash commands.
 
@@ -407,9 +447,57 @@ Independente se novo ou existente, o `<projeto>` é o caminho do projeto AIOS de
    - `optimization-report.md`, `validation-report.md` -- logs internos
    - `INPUT.md` -- input bruto do usuário
 
-### Passo 4: Habilitar Slash Commands
+### Passo 4: Instalar Agentes no Path IDE e Registrar no Lock File
 
-O AIOS Core registra slash commands no Claude Code via `.claude/commands/{prefix}/agents/`.
+Após copiar o squad para `<projeto>/squads/<nome>/`, executar dois passos adicionais para compatibilidade com o CLI `squads`:
+
+1. **Copiar agentes para `.claude/squads/`** (path de instalação IDE):
+   ```bash
+   mkdir -p <projeto>/.claude/squads/<nome>/agents
+   cp <projeto>/squads/<nome>/agents/*.md <projeto>/.claude/squads/<nome>/agents/
+   ```
+
+2. **Registrar no `.squad-lock.json`:**
+
+   Gerar hash do conteúdo do squad:
+   ```bash
+   find <projeto>/squads/<nome> -type f | sort | xargs shasum -a 256 | shasum -a 256 | cut -c1-16
+   ```
+
+   Extrair versão do squad.yaml:
+   ```bash
+   grep 'version:' <projeto>/squads/<nome>/squad.yaml | head -1 | awk '{print $2}' | tr -d '"'
+   ```
+
+   Listar IDs dos agentes (sem extensão .md):
+   ```bash
+   ls <projeto>/squads/<nome>/agents/*.md | xargs -I{} basename {} .md
+   ```
+
+   Criar/atualizar `.squad-lock.json` na raiz do projeto via Write tool com formato:
+   ```json
+   {
+     "version": 1,
+     "squads": {
+       "<nome>": {
+         "source": "local:squad-creator",
+         "squad": "<nome>",
+         "version": "<version do squad.yaml>",
+         "hash": "<sha256 truncado 16 chars>",
+         "installedAt": "<ISO-8601>",
+         "agents": ["agent-1", "agent-2"]
+       }
+     }
+   }
+   ```
+
+   Se `.squad-lock.json` já existir, ler o conteúdo atual e adicionar/atualizar apenas a entry do squad sendo deployado (preservar entries de outros squads).
+
+   Formato baseado em `LockEntry` de `squads-sh/packages/cli/src/types.ts`.
+
+### Passo 5: Habilitar Slash Commands
+
+O AIOS Core registra slash commands no Claude Code via `.claude/commands/SQUADS/{prefix}/`.
 O `slashPrefix` está definido no `squad.yaml` (campo `slashPrefix`).
 
 1. **Extrair o slashPrefix** do squad.yaml:
@@ -420,8 +508,8 @@ O `slashPrefix` está definido no `squad.yaml` (campo `slashPrefix`).
 
 2. **Criar diretório de commands e copiar agentes:**
    ```bash
-   mkdir -p <projeto>/.claude/commands/<prefix>/agents
-   cp <projeto>/squads/<nome>/agents/*.md <projeto>/.claude/commands/<prefix>/agents/
+   mkdir -p <projeto>/.claude/commands/SQUADS/<prefix>
+   cp <projeto>/squads/<nome>/agents/*.md <projeto>/.claude/commands/SQUADS/<prefix>/
    ```
 
 3. **Criar/atualizar .aios-sync.yaml** no projeto destino:
@@ -436,7 +524,7 @@ O `slashPrefix` está definido no `squad.yaml` (campo `slashPrefix`).
          source: 'squads/*/agents/'
          destinations:
            claude:
-             - path: '.claude/commands/{squad_alias}/agents/'
+             - path: '.claude/commands/SQUADS/{squad_alias}/'
                format: 'md'
      ```
    - Se `.aios-sync.yaml` JÁ existe, adicionar apenas o alias do squad:
@@ -444,22 +532,24 @@ O `slashPrefix` está definido no `squad.yaml` (campo `slashPrefix`).
 
 4. **Verificar que os commands foram registrados:**
    ```bash
-   ls <projeto>/.claude/commands/<prefix>/agents/
+   ls <projeto>/.claude/commands/SQUADS/<prefix>/
    ```
 
-### Passo 5: Finalizar
+### Passo 6: Finalizar
 
 ```bash
-node bin/squad-tools.cjs state advance <nome> --phase=7 --notes="Squad deployado em <projeto>/squads/<nome>/, commands habilitados em /<prefix>:"
+node bin/squad-tools.cjs state advance <nome> --phase=8 --notes="Squad deployado em <projeto>/squads/<nome>/, commands habilitados em /SQUADS:<prefix>:"
 node bin/squad-tools.cjs snapshot <nome>
 ```
 
 Informar ao usuário:
 - Caminho do squad deployado
 - Quantos agentes, tasks, workflows
-- Slash commands disponíveis: `/<prefix>:agents:<agent-id>` para cada agente
+- Slash commands disponíveis: `/SQUADS:<prefix>:<agent-id>` para cada agente
 - Se AIOS Core foi instalado ou se já existia
-- Exemplo de uso: `/<prefix>:agents:<primeiro-agente>`
+- Caminho dos agentes IDE: `.claude/squads/<nome>/agents/`
+- Lock file: `.squad-lock.json`
+- Exemplo de uso: `/SQUADS:<prefix>:<primeiro-agente>`
 
 **Exemplo de output:**
 
@@ -472,13 +562,92 @@ Squad deployado com sucesso!
   Tasks:      8
   Workflows:  2
 
+  Registros:
+    Lock file:    .squad-lock.json
+    Agentes IDE:  .claude/squads/<nome>/agents/
+    Slash cmds:   .claude/commands/SQUADS/<prefix>/
+
   Slash commands disponíveis:
-    /<prefix>:agents:<agent-1>
-    /<prefix>:agents:<agent-2>
+    /SQUADS:<prefix>:<agent-1>
+    /SQUADS:<prefix>:<agent-2>
     ...
 
   Para usar, abra o Claude Code no projeto e digite:
-    /<prefix>:agents:<agent-1>
+    /SQUADS:<prefix>:<agent-1>
+```
+
+---
+
+## FASE 9 — Publicação no squads.sh (squad-publisher) [OPCIONAL]
+
+Após deploy, oferecer publicação.
+
+### Passo 1: Perguntar ao usuário
+
+Usar AskUserQuestion:
+- **Sim, publicar** — Executar a Fase 9
+- **Não, pular** — Finalizar o pipeline
+
+### Se o usuário recusar (Não, pular):
+
+```bash
+node bin/squad-tools.cjs state add-decision <nome> --key=publish --value=skipped
+node bin/squad-tools.cjs state advance <nome> --phase=9 --notes="Publicação pulada pelo usuário"
+```
+
+Prosseguir direto para a Finalização.
+
+### Se aceitar:
+
+**subagent_type:** `squad-publisher`
+
+O Publisher guia o usuário por:
+1. Verificar CLI `squads` disponível
+2. Autenticar via `squads login`
+3. Validar squad.yaml
+4. Confirmar com o usuário
+5. Publicar via `squads publish`
+6. Reportar URL
+
+### Avançar estado
+
+```bash
+node bin/squad-tools.cjs state advance <nome> --phase=9 --notes="Publicado em squads.sh"
+```
+
+---
+
+## Finalização
+
+Após a Fase 8 (e opcionalmente Fase 9), apresentar o resumo final completo:
+
+```bash
+node bin/squad-tools.cjs snapshot <nome>
+```
+
+Informar ao usuário:
+
+```
+Squad gerado com sucesso!
+
+  Projeto:    /caminho/do/projeto
+  Squad:      squads/<nome>/
+  Agentes:    N
+  Tasks:      N
+  Workflows:  N
+
+  Slash commands:
+    /SQUADS:<prefix>:<agent-1>
+    /SQUADS:<prefix>:<agent-2>
+    ...
+
+  Registros:
+    Lock file:    .squad-lock.json
+    Agentes IDE:  .claude/squads/<nome>/agents/
+    Slash cmds:   .claude/commands/SQUADS/<prefix>/
+
+  Para usar, abra o Claude Code no projeto e digite:
+    /SQUADS:<prefix>:<agent-1>      — para ativar um agente
 ```
 
 ---
@@ -488,6 +657,7 @@ Squad deployado com sucesso!
 ### Anti-loop
 - Use `node bin/squad-tools.cjs state get <nome>` ANTES de cada fase
 - NUNCA re-execute uma fase já completa (exceto retry de validação na Fase 6, que opera DENTRO do escopo da Fase 6)
+- NUNCA execute a Fase 9 (Publisher) sem confirmação explícita do usuário
 - Se detectar tentativa de loop, PARE e informe o usuário
 
 ### Context Engineering

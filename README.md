@@ -1,6 +1,6 @@
 # Nirvana Squad Creator
 
-> Gera squads AIOS otimizados a partir de linguagem natural — pipeline de 11 fases com análise, geração, otimização, validação, README multi-idioma, deploy, CC Skill e publicação no squads.sh.
+> Gera squads AIOS otimizados a partir de linguagem natural — pipeline de 9 fases com análise, geração, otimização, validação, README multi-idioma, deploy e publicação no squads.sh.
 
 ## Instalação
 
@@ -12,8 +12,8 @@ npx squads add gutomec/nirvana-squad-creator/nirvana-squad-creator
 
 ```
 nirvana-squad-creator/          # Squad AIOS publicável
-├── agents/                     # 11 agentes especializados
-├── tasks/                      # 12 tasks com contratos Entrada/Saída
+├── agents/                     # 9 agentes especializados
+├── tasks/                      # 10 tasks com contratos Entrada/Saída
 ├── workflows/                  # 2 workflows (pipeline + publish)
 ├── config/                     # Padrões, tech stack, source tree
 ├── references/                 # Specs completas dos formatos

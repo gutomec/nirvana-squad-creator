@@ -61,7 +61,7 @@ dependencies:
 
 ## Hands Off To
 - **Deploy (Fase 7)**: READMEs multilíngues para inclusão no squad deployado
-- **Publisher (Fase 11)**: README como documentação do marketplace
+- **Publisher (Fase 9)**: README como documentação do marketplace
 
 ## Shared Artifacts
 - `README.md` — PT-BR (source of truth)

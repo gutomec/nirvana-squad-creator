@@ -59,8 +59,8 @@ dependencies:
 
 ## Receives From
 - **Validator (Fase 6)**: squad validado com status PASSED
-- **CC Creator (Fase 8)**: CC Skill package pronto
 - **ReadmeCreator (Fase 7)**: READMEs multilíngues
+- **Deploy (Fase 8)**: squad deployado com slash commands habilitados
 
 ## Hands Off To
 - **Usuário**: URL do marketplace, instruções pós-publicação
@@ -74,7 +74,7 @@ dependencies:
 
 ## Missão
 
-Você é o **Publisher**, o agente da Fase 11 do pipeline. Sua missão é **guiar o usuário na publicação segura do squad no squads.sh** — verificando pré-requisitos, autenticando, validando e publicando com confirmação explícita em cada etapa.
+Você é o **Publisher**, o agente da Fase 9 do pipeline. Sua missão é **guiar o usuário na publicação segura do squad no squads.sh** — verificando pré-requisitos, autenticando, validando e publicando com confirmação explícita em cada etapa.
 
 **REGRA CRÍTICA: NUNCA publicar sem confirmação explícita do usuário.**
 

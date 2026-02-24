@@ -1,6 +1,6 @@
 # Nirvana Squad Creator
 
-> 通过自然语言生成优化的 AIOS squad — 包含分析、生成、优化、验证、多语言 README、部署、CC Skill 和 squads.sh 发布的 11 阶段流水线。
+> 通过自然语言生成优化的 AIOS squad — 包含分析、生成、优化、验证、多语言 README、部署和 squads.sh 发布的 9 阶段流水线。
 
 ## 安装
 
@@ -17,12 +17,11 @@ Nirvana Squad Creator 是一个**元工具**：一个能生成其他 AIOS squad 
 - **工作流** — 自动选择模式和转换规则
 - **配置** — 适配领域（coding-standards、tech-stack、source-tree）
 - **README 文档** — 支持 6 种语言（PT-BR、en、zh、hi、es、ar）
-- **CC Skill 包** — 可直接在 Claude Code 中使用
 - **发布** — 发布到 squads.sh 市场
 
 零冗余智能体。6 个类别的验证。自动部署并启用斜杠命令。
 
-## 流水线 — 11 个阶段
+## 流水线 — 9 个阶段
 
 | 阶段 | 智能体 | 职责 | 模型 |
 |------|--------|------|------|
@@ -35,9 +34,7 @@ Nirvana Squad Creator 是一个**元工具**：一个能生成其他 AIOS squad 
 | 6 | ✅ Validator | 6 类 AIOS 验证 | Sonnet |
 | 7 | 🌐 ReadmeCreator | 6 种语言的 README | Opus |
 | 8 | — Deploy | 部署到 AIOS 项目，启用命令 | 编排器 |
-| 9 | 🎯 CCCreator | 转换为 CC Skill 包 | Opus |
-| 10 | 🔭 SkillsScout | 搜索互补技能（可选） | Sonnet |
-| 11 | 🚀 Publisher | 发布到 squads.sh（可选） | 编排器 |
+| 9 | 🚀 Publisher | 发布到 squads.sh（可选） | 编排器 |
 
 ## 智能体
 
@@ -50,8 +47,6 @@ Nirvana Squad Creator 是一个**元工具**：一个能生成其他 AIOS squad 
 | ⚡ | Optimizer | Balancer | 消除冗余，修复交叉引用 |
 | ✅ | Validator | Guardian | 对照 6 个 AIOS 规范类别进行验证 |
 | 🌐 | ReadmeCreator | Builder | 生成 PT-BR 及 5 种翻译版本的 README |
-| 🎯 | CCCreator | Builder | 将 AIOS squad 转换为 CC Skill 包 |
-| 🔭 | SkillsScout | Guardian | 搜索社区互补技能 |
 | 🚀 | Publisher | Flow_Master | 引导发布到 squads.sh 市场 |
 
 ## 任务
@@ -66,17 +61,15 @@ Nirvana Squad Creator 是一个**元工具**：一个能生成其他 AIOS squad 
 | `validateSquad()` | Validator | Organism |
 | `createMultilingualReadme()` | ReadmeCreator | Organism |
 | `deploySquad()` | 编排器 | Organism |
-| `createCcSkill()` | CCCreator | Organism |
-| `discoverSkills()` | SkillsScout | Molecule |
 | `publishSquad()` | Publisher | Molecule |
 | `manageState()` | 编排器 | Molecule |
 
 ## 工作流
 
 ### squad_generation_pipeline
-11 阶段主流水线 — 从需求分析到发布。
+9 阶段主流水线 — 从需求分析到发布。
 ```
-[Analyzer] → [AgentCreator] → [TaskCreator] → [WorkflowCreator] → [Optimizer] → [Validator] → [ReadmeCreator] → Deploy → [CCCreator] → [SkillsScout] → [Publisher]
+[Analyzer] → [AgentCreator] → [TaskCreator] → [WorkflowCreator] → [Optimizer] → [Validator] → [ReadmeCreator] → Deploy → [Publisher]
 ```
 
 ### squad_publish_flow
@@ -95,21 +88,19 @@ Nirvana Squad Creator 是一个**元工具**：一个能生成其他 AIOS squad 
 
 ### 完整流水线
 ```bash
-/nsc:agents:squad-analyzer
+/SQUADS:nsc:squad-analyzer
 ```
 
 ### 单个智能体
 ```
-/nsc:agents:squad-analyzer          — 需求分析
-/nsc:agents:squad-agent-creator     — 智能体生成
-/nsc:agents:squad-task-creator      — 任务生成
-/nsc:agents:squad-workflow-creator  — 工作流和 squad.yaml
-/nsc:agents:squad-optimizer         — 优化
-/nsc:agents:squad-validator         — 验证
-/nsc:agents:squad-readme-creator    — 多语言 README
-/nsc:agents:squad-cc-creator        — CC Skill 包
-/nsc:agents:squad-skills-scout      — 技能发现
-/nsc:agents:squad-publisher         — 发布
+/SQUADS:nsc:squad-analyzer          — 需求分析
+/SQUADS:nsc:squad-agent-creator     — 智能体生成
+/SQUADS:nsc:squad-task-creator      — 任务生成
+/SQUADS:nsc:squad-workflow-creator  — 工作流和 squad.yaml
+/SQUADS:nsc:squad-optimizer         — 优化
+/SQUADS:nsc:squad-validator         — 验证
+/SQUADS:nsc:squad-readme-creator    — 多语言 README
+/SQUADS:nsc:squad-publisher         — 发布
 ```
 
 ## 作者

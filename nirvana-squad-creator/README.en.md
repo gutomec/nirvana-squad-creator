@@ -1,6 +1,6 @@
 # Nirvana Squad Creator
 
-> Generates optimized AIOS squads from natural language — 11-phase pipeline with analysis, generation, optimization, validation, multilingual READMEs, deployment, CC Skill and squads.sh publishing.
+> Generates optimized AIOS squads from natural language — 9-phase pipeline with analysis, generation, optimization, validation, multilingual READMEs, deployment and squads.sh publishing.
 
 ## Installation
 
@@ -17,12 +17,11 @@ Nirvana Squad Creator is a **meta-tool**: an AIOS squad that generates other AIO
 - **Workflows** with automatic pattern selection and transitions
 - **Config** tailored to the domain (coding-standards, tech-stack, source-tree)
 - **READMEs** in 6 languages (PT-BR, en, zh, hi, es, ar)
-- **CC Skill package** for direct use in Claude Code
 - **Publishing** to the squads.sh marketplace
 
 Zero redundant agents. Validation across 6 categories. Automatic deployment with slash command enablement.
 
-## Pipeline — 11 Phases
+## Pipeline — 9 Phases
 
 | Phase | Agent | Role | Model |
 |-------|-------|------|-------|
@@ -35,9 +34,7 @@ Zero redundant agents. Validation across 6 categories. Automatic deployment with
 | 6 | ✅ Validator | 6-category AIOS validation | Sonnet |
 | 7 | 🌐 ReadmeCreator | READMEs in 6 languages | Opus |
 | 8 | — Deploy | Deploys to AIOS project, enables commands | Orchestrator |
-| 9 | 🎯 CCCreator | Transforms into CC Skill package | Opus |
-| 10 | 🔭 SkillsScout | Searches for complementary skills (optional) | Sonnet |
-| 11 | 🚀 Publisher | Publishes to squads.sh (optional) | Orchestrator |
+| 9 | 🚀 Publisher | Publishes to squads.sh (optional) | Orchestrator |
 
 ## Agents
 
@@ -50,8 +47,6 @@ Zero redundant agents. Validation across 6 categories. Automatic deployment with
 | ⚡ | Optimizer | Balancer | Eliminates redundancies, fixes cross-references |
 | ✅ | Validator | Guardian | Validates against 6 AIOS specification categories |
 | 🌐 | ReadmeCreator | Builder | Generates READMEs in PT-BR + 5 translations |
-| 🎯 | CCCreator | Builder | Transforms AIOS squad into CC Skill package |
-| 🔭 | SkillsScout | Guardian | Searches for complementary community skills |
 | 🚀 | Publisher | Flow_Master | Guides publishing to the squads.sh marketplace |
 
 ## Tasks
@@ -66,17 +61,15 @@ Zero redundant agents. Validation across 6 categories. Automatic deployment with
 | `validateSquad()` | Validator | Organism |
 | `createMultilingualReadme()` | ReadmeCreator | Organism |
 | `deploySquad()` | Orchestrator | Organism |
-| `createCcSkill()` | CCCreator | Organism |
-| `discoverSkills()` | SkillsScout | Molecule |
 | `publishSquad()` | Publisher | Molecule |
 | `manageState()` | Orchestrator | Molecule |
 
 ## Workflows
 
 ### squad_generation_pipeline
-Main 11-phase pipeline — from requirements analysis to publishing.
+Main 9-phase pipeline — from requirements analysis to publishing.
 ```
-[Analyzer] → [AgentCreator] → [TaskCreator] → [WorkflowCreator] → [Optimizer] → [Validator] → [ReadmeCreator] → Deploy → [CCCreator] → [SkillsScout] → [Publisher]
+[Analyzer] → [AgentCreator] → [TaskCreator] → [WorkflowCreator] → [Optimizer] → [Validator] → [ReadmeCreator] → Deploy → [Publisher]
 ```
 
 ### squad_publish_flow
@@ -95,21 +88,19 @@ Standalone flow to publish an existing squad to squads.sh.
 
 ### Full pipeline
 ```bash
-/nsc:agents:squad-analyzer
+/SQUADS:nsc:squad-analyzer
 ```
 
 ### Individual agents
 ```
-/nsc:agents:squad-analyzer          — Requirements analysis
-/nsc:agents:squad-agent-creator     — Agent generation
-/nsc:agents:squad-task-creator      — Task generation
-/nsc:agents:squad-workflow-creator  — Workflows and squad.yaml
-/nsc:agents:squad-optimizer         — Optimization
-/nsc:agents:squad-validator         — Validation
-/nsc:agents:squad-readme-creator    — Multilingual READMEs
-/nsc:agents:squad-cc-creator        — CC Skill package
-/nsc:agents:squad-skills-scout      — Skills discovery
-/nsc:agents:squad-publisher         — Publishing
+/SQUADS:nsc:squad-analyzer          — Requirements analysis
+/SQUADS:nsc:squad-agent-creator     — Agent generation
+/SQUADS:nsc:squad-task-creator      — Task generation
+/SQUADS:nsc:squad-workflow-creator  — Workflows and squad.yaml
+/SQUADS:nsc:squad-optimizer         — Optimization
+/SQUADS:nsc:squad-validator         — Validation
+/SQUADS:nsc:squad-readme-creator    — Multilingual READMEs
+/SQUADS:nsc:squad-publisher         — Publishing
 ```
 
 ## Author

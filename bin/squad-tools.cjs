@@ -14,7 +14,7 @@ const path = require('path');
 
 const BASE_DIR = path.resolve(process.cwd(), '.squad-workspace');
 
-// 6 phases of the squad creation pipeline
+// 9 phases of the squad creation pipeline
 // File ownership:
 //   Phase 1 (Analyzer):         writes analysis.md, component-registry.md
 //   Phase 2 (Agent Creator):    writes agents/*.md
@@ -22,6 +22,9 @@ const BASE_DIR = path.resolve(process.cwd(), '.squad-workspace');
 //   Phase 4 (Workflow Creator): writes workflows/*.yaml, config/*.md, squad.yaml
 //   Phase 5 (Optimizer):        edits all generated files, writes optimization-report.md
 //   Phase 6 (Validator):        writes validation-report.md (read-only access to rest)
+//   Phase 7 (README Creator):   writes README.md + 5 translations
+//   Phase 8 (Deploy):           deploys squad to AIOS project, enables slash commands
+//   Phase 9 (Publisher):        publishes squad to squads.sh marketplace
 const PHASES = {
   1: { name: 'Analyzer', outputDir: null, outputFile: 'analysis.md' },
   2: { name: 'Agent Creator', outputDir: 'agents', outputFile: null },
@@ -29,6 +32,9 @@ const PHASES = {
   4: { name: 'Workflow Creator', outputDir: 'workflows', outputFile: null },
   5: { name: 'Optimizer', outputDir: null, outputFile: 'optimization-report.md' },
   6: { name: 'Validator', outputDir: null, outputFile: 'validation-report.md' },
+  7: { name: 'README Creator', outputDir: null, outputFile: null },
+  8: { name: 'Deploy', outputDir: null, outputFile: null },
+  9: { name: 'Publisher', outputDir: null, outputFile: null },
 };
 
 // Expected outputs per phase for validation
@@ -39,6 +45,9 @@ const REQUIRED_OUTPUTS = {
   4: { dirs: ['workflows'], minFiles: 1, files: ['squad.yaml'] },
   5: { files: ['optimization-report.md'] },
   6: { files: ['validation-report.md'] },
+  7: { files: ['README.md', 'README.en.md'] },
+  8: {},
+  9: {},
 };
 
 const PRESETS = {
@@ -210,6 +219,9 @@ function createStateMd(name, presetName) {
 | 4 | Workflow Creator | pendente | — | — | — |
 | 5 | Optimizer | pendente | — | — | — |
 | 6 | Validator | pendente | — | — | — |
+| 7 | README Creator | pendente | — | — | — |
+| 8 | Deploy | pendente | — | — | — |
+| 9 | Publisher | pendente | — | — | — |
 
 ## Decisões
 
@@ -530,7 +542,7 @@ COMMANDS.validate = function (args) {
   if (phase === null || isNaN(phase)) fail('Flag --phase é obrigatória');
 
   const phaseInfo = PHASES[phase];
-  if (!phaseInfo) fail(`Fase ${phase} não reconhecida. Fases válidas: 1-6`);
+  if (!phaseInfo) fail(`Fase ${phase} não reconhecida. Fases válidas: 1-9`);
 
   const requirements = REQUIRED_OUTPUTS[phase];
   if (!requirements) fail(`Sem requisitos de validação para fase ${phase}`);

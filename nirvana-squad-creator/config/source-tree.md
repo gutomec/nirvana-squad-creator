@@ -4,7 +4,7 @@
 
 ```
 squads/nirvana-squad-creator/
-├── agents/                           # 10 agentes (formato AIOS)
+├── agents/                           # 9 agentes (formato AIOS)
 │   ├── squad-analyzer.md
 │   ├── squad-agent-creator.md
 │   ├── squad-task-creator.md
@@ -12,10 +12,9 @@ squads/nirvana-squad-creator/
 │   ├── squad-optimizer.md
 │   ├── squad-validator.md
 │   ├── squad-readme-creator.md
-│   ├── squad-cc-creator.md
-│   ├── squad-skills-scout.md
-│   └── squad-publisher.md
-├── tasks/                            # 12 tasks (formato AIOS)
+│   ├── squad-publisher.md
+│   └── squad-orchestrator.md
+├── tasks/                            # 10 tasks (formato AIOS)
 │   ├── analyze-requirements.md
 │   ├── create-agents.md
 │   ├── create-tasks.md
@@ -24,8 +23,6 @@ squads/nirvana-squad-creator/
 │   ├── validate-squad.md
 │   ├── create-multilingual-readme.md
 │   ├── deploy-squad.md
-│   ├── create-cc-skill.md
-│   ├── discover-skills.md
 │   ├── publish-squad.md
 │   └── manage-state.md
 ├── workflows/                        # 2 workflows AIOS
@@ -37,8 +34,8 @@ squads/nirvana-squad-creator/
 │   └── source-tree.md
 ├── scripts/
 │   └── squad-tools.cjs
-├── templates/                        # 5 templates (cópia)
-├── references/                       # 6 referências (cópia)
+├── templates/                        # 4 templates (cópia)
+├── references/                       # 5 referências (cópia)
 ├── squad.yaml
 ├── README.md
 ├── README.en.md

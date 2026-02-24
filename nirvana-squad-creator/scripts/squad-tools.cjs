@@ -14,7 +14,7 @@ const path = require('path');
 
 const BASE_DIR = path.resolve(process.cwd(), '.squad-workspace');
 
-// 11 phases of the squad creation pipeline
+// 9 phases of the squad creation pipeline
 // File ownership:
 //   Phase 1 (Analyzer):         writes analysis.md, component-registry.md
 //   Phase 2 (Agent Creator):    writes agents/*.md
@@ -24,9 +24,7 @@ const BASE_DIR = path.resolve(process.cwd(), '.squad-workspace');
 //   Phase 6 (Validator):        writes validation-report.md (read-only access to rest)
 //   Phase 7 (README Creator):   writes README.md, README.en.md, README.zh.md, etc.
 //   Phase 8 (Deploy):           deploys squad to AIOS project, enables slash commands
-//   Phase 9 (CC Creator):       transforms AIOS squad into Claude Code Skill package
-//   Phase 10 (Skills Scout):    searches community skills, writes skills-discovery-report.md
-//   Phase 11 (Publisher):       publishes squad to squads.sh marketplace
+//   Phase 9 (Publisher):        publishes squad to squads.sh marketplace
 const PHASES = {
   1: { name: 'Analyzer', outputDir: null, outputFile: 'analysis.md' },
   2: { name: 'Agent Creator', outputDir: 'agents', outputFile: null },
@@ -36,9 +34,7 @@ const PHASES = {
   6: { name: 'Validator', outputDir: null, outputFile: 'validation-report.md' },
   7: { name: 'README Creator', outputDir: null, outputFile: null },
   8: { name: 'Deploy', outputDir: null, outputFile: null },
-  9: { name: 'CC Creator', outputDir: null, outputFile: 'cc-skill-report.md' },
-  10: { name: 'Skills Scout', outputDir: null, outputFile: 'skills-discovery-report.md' },
-  11: { name: 'Publisher', outputDir: null, outputFile: null },
+  9: { name: 'Publisher', outputDir: null, outputFile: null },
 };
 
 // Expected outputs per phase for validation
@@ -51,9 +47,7 @@ const REQUIRED_OUTPUTS = {
   6: { files: ['validation-report.md'] },
   7: { files: ['README.md', 'README.en.md'] },
   8: {},
-  9: { files: ['cc-skill-report.md'] },
-  10: { files: ['skills-discovery-report.md'] },
-  11: {},
+  9: {},
 };
 
 const PRESETS = {
@@ -227,9 +221,7 @@ function createStateMd(name, presetName) {
 | 6 | Validator | pendente | — | — | — |
 | 7 | README Creator | pendente | — | — | — |
 | 8 | Deploy | pendente | — | — | — |
-| 9 | CC Creator | pendente | — | — | — |
-| 10 | Skills Scout | pendente | — | — | — |
-| 11 | Publisher | pendente | — | — | — |
+| 9 | Publisher | pendente | — | — | — |
 
 ## Decisões
 
@@ -550,7 +542,7 @@ COMMANDS.validate = function (args) {
   if (phase === null || isNaN(phase)) fail('Flag --phase é obrigatória');
 
   const phaseInfo = PHASES[phase];
-  if (!phaseInfo) fail(`Fase ${phase} não reconhecida. Fases válidas: 1-11`);
+  if (!phaseInfo) fail(`Fase ${phase} não reconhecida. Fases válidas: 1-9`);
 
   const requirements = REQUIRED_OUTPUTS[phase];
   if (!requirements) fail(`Sem requisitos de validação para fase ${phase}`);
@@ -677,7 +669,7 @@ function main() {
   const args = process.argv.slice(2);
 
   if (args.length === 0) {
-    console.log(`squad-tools.cjs — CLI de estado atômico para o pipeline de squads (11 fases)
+    console.log(`squad-tools.cjs — CLI de estado atômico para o pipeline de squads (9 fases)
 
 Comandos:
   init <session> [--preset=padrao]                    Criar nova sessão
@@ -686,7 +678,7 @@ Comandos:
   state advance <session> --phase=N [--notes="..."]    Avançar fase atomicamente
   state gate <session> --phase=N --result=... [--notes]  Registrar gate
   state add-decision <session> --key=... --value=...   Adicionar decisão
-  validate <session> --phase=N                         Validar outputs esperados por fase (1-11)
+  validate <session> --phase=N                         Validar outputs esperados por fase (1-9)
   snapshot <session>                                   Config + state + inventário completo
 
 Todas as saídas são JSON. Erros retornam { ok: false, error: "..." }.`);

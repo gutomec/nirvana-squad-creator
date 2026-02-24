@@ -1,6 +1,6 @@
 # Nirvana Squad Creator
 
-> ينشئ فرق AIOS محسّنة من اللغة الطبيعية — خط أنابيب من 11 مرحلة يشمل التحليل والتوليد والتحسين والتحقق وملفات README متعددة اللغات والنشر وCC Skill والنشر على squads.sh.
+> ينشئ فرق AIOS محسّنة من اللغة الطبيعية — خط أنابيب من 9 مرحلة يشمل التحليل والتوليد والتحسين والتحقق وملفات README متعددة اللغات والنشر والنشر على squads.sh.
 
 ## التثبيت
 
@@ -17,12 +17,11 @@ Nirvana Squad Creator هو **أداة وصفية**: فريق AIOS ينشئ فر�
 - **سير عمل** مع اختيار تلقائي للنمط والانتقالات
 - **إعدادات** مكيّفة حسب المجال (coding-standards، tech-stack، source-tree)
 - **ملفات README** بـ 6 لغات (PT-BR، en، zh، hi، es، ar)
-- **حزمة CC Skill** للاستخدام المباشر في Claude Code
 - **نشر** على سوق squads.sh
 
 صفر وكلاء زائدين. تحقق في 6 فئات. نشر تلقائي مع تفعيل أوامر slash.
 
-## خط الأنابيب — 11 مرحلة
+## خط الأنابيب — 9 مرحلة
 
 | المرحلة | الوكيل | الدور | النموذج |
 |---------|--------|-------|---------|
@@ -35,9 +34,7 @@ Nirvana Squad Creator هو **أداة وصفية**: فريق AIOS ينشئ فر�
 | 6 | ✅ Validator | تحقق من 6 فئات AIOS | Sonnet |
 | 7 | 🌐 ReadmeCreator | ملفات README بـ 6 لغات | Opus |
 | 8 | — Deploy | ينشر في مشروع AIOS، يفعّل الأوامر | المنسّق |
-| 9 | 🎯 CCCreator | يحوّل إلى حزمة CC Skill | Opus |
-| 10 | 🔭 SkillsScout | يبحث عن مهارات مكمّلة (اختياري) | Sonnet |
-| 11 | 🚀 Publisher | ينشر على squads.sh (اختياري) | المنسّق |
+| 9 | 🚀 Publisher | ينشر على squads.sh (اختياري) | المنسّق |
 
 ## الوكلاء
 
@@ -50,8 +47,6 @@ Nirvana Squad Creator هو **أداة وصفية**: فريق AIOS ينشئ فر�
 | ⚡ | Optimizer | Balancer | يزيل التكرار، يصحح المراجع التبادلية |
 | ✅ | Validator | Guardian | يتحقق من 6 فئات مواصفات AIOS |
 | 🌐 | ReadmeCreator | Builder | ينشئ README بالبرتغالية + 5 ترجمات |
-| 🎯 | CCCreator | Builder | يحوّل فريق AIOS إلى حزمة CC Skill |
-| 🔭 | SkillsScout | Guardian | يبحث عن مهارات مكمّلة من المجتمع |
 | 🚀 | Publisher | Flow_Master | يوجّه النشر على سوق squads.sh |
 
 ## المهام
@@ -66,17 +61,15 @@ Nirvana Squad Creator هو **أداة وصفية**: فريق AIOS ينشئ فر�
 | `validateSquad()` | Validator | Organism |
 | `createMultilingualReadme()` | ReadmeCreator | Organism |
 | `deploySquad()` | المنسّق | Organism |
-| `createCcSkill()` | CCCreator | Organism |
-| `discoverSkills()` | SkillsScout | Molecule |
 | `publishSquad()` | Publisher | Molecule |
 | `manageState()` | المنسّق | Molecule |
 
 ## سير العمل
 
 ### squad_generation_pipeline
-خط الأنابيب الرئيسي ذو 11 مرحلة — من تحليل المتطلبات إلى النشر.
+خط الأنابيب الرئيسي ذو 9 مرحلة — من تحليل المتطلبات إلى النشر.
 ```
-[Analyzer] → [AgentCreator] → [TaskCreator] → [WorkflowCreator] → [Optimizer] → [Validator] → [ReadmeCreator] → Deploy → [CCCreator] → [SkillsScout] → [Publisher]
+[Analyzer] → [AgentCreator] → [TaskCreator] → [WorkflowCreator] → [Optimizer] → [Validator] → [ReadmeCreator] → Deploy → [Publisher]
 ```
 
 ### squad_publish_flow
@@ -95,21 +88,19 @@ Nirvana Squad Creator هو **أداة وصفية**: فريق AIOS ينشئ فر�
 
 ### خط الأنابيب الكامل
 ```bash
-/nsc:agents:squad-analyzer
+/SQUADS:nsc:squad-analyzer
 ```
 
 ### الوكلاء الفرديون
 ```
-/nsc:agents:squad-analyzer          — تحليل المتطلبات
-/nsc:agents:squad-agent-creator     — توليد الوكلاء
-/nsc:agents:squad-task-creator      — توليد المهام
-/nsc:agents:squad-workflow-creator  — سير العمل وsquad.yaml
-/nsc:agents:squad-optimizer         — التحسين
-/nsc:agents:squad-validator         — التحقق
-/nsc:agents:squad-readme-creator    — README متعدد اللغات
-/nsc:agents:squad-cc-creator        — حزمة CC Skill
-/nsc:agents:squad-skills-scout      — اكتشاف المهارات
-/nsc:agents:squad-publisher         — النشر
+/SQUADS:nsc:squad-analyzer          — تحليل المتطلبات
+/SQUADS:nsc:squad-agent-creator     — توليد الوكلاء
+/SQUADS:nsc:squad-task-creator      — توليد المهام
+/SQUADS:nsc:squad-workflow-creator  — سير العمل وsquad.yaml
+/SQUADS:nsc:squad-optimizer         — التحسين
+/SQUADS:nsc:squad-validator         — التحقق
+/SQUADS:nsc:squad-readme-creator    — README متعدد اللغات
+/SQUADS:nsc:squad-publisher         — النشر
 ```
 
 ## المؤلف

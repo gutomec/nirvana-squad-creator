@@ -98,7 +98,7 @@ Metadata:
 
 ## Descrição
 
-A task `publishSquad()` é a **décima primeira fase** do pipeline e é **opcional**. Publica o squad validado no marketplace squads.sh para compartilhamento com a comunidade.
+A task `publishSquad()` é a **nona fase** do pipeline e é **opcional**. Publica o squad validado no marketplace squads.sh para compartilhamento com a comunidade.
 
 ### Responsabilidades
 

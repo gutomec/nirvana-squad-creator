@@ -1,8 +1,8 @@
 # Workflow: squad_generation_pipeline (sequential pipeline pattern)
-# Pipeline completo de geração de squads AIOS — 11 fases desde análise até publicação
+# Pipeline completo de geração de squads AIOS — 9 fases desde análise até publicação
 
 workflow_name: squad_generation_pipeline
-description: "Pipeline completo de geração de squads AIOS — 11 fases desde análise de requisitos até publicação no squads.sh"
+description: "Pipeline completo de geração de squads AIOS — 9 fases desde análise de requisitos até publicação no squads.sh"
 
 agent_sequence:
   - squad-analyzer
@@ -12,8 +12,6 @@ agent_sequence:
   - squad-optimizer
   - squad-validator
   - squad-readme-creator
-  - squad-cc-creator
-  - squad-skills-scout
   - squad-publisher
 
 key_commands:
@@ -27,7 +25,6 @@ success_indicators:
   - "Squad AIOS validado com 6 categorias PASSED"
   - "READMEs gerados em 6 idiomas com estrutura idêntica"
   - "Squad deployado em projeto AIOS com slash commands habilitados"
-  - "CC Skill package gerado com skill agents e command personas"
   - "Publicação no squads.sh concluída (se solicitada)"
 
 transitions:
@@ -97,19 +94,10 @@ transitions:
   deploy_complete:
     trigger: "squad deployed and slash commands enabled"
     confidence: 0.90
-    greeting_message: "Deploy completo. Gerando CC Skill."
+    greeting_message: "Deploy completo. Pipeline finalizado."
     next_steps:
-      - command: "*create-cc-skill"
-        description: "Transform AIOS squad into Claude Code Skill"
-        priority: 1
-
-  cc_skill_created:
-    trigger: "CC Skill package generated with all required files"
-    confidence: 0.85
-    greeting_message: "CC Skill gerado. Skills discovery disponível."
-    next_steps:
-      - command: "*discover-skills"
-        description: "Search community skills (optional)"
+      - command: "*publish-squad"
+        description: "Publish squad to squads.sh marketplace (optional)"
         priority: 1
 
   pipeline_complete:
