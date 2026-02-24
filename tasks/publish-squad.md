@@ -160,3 +160,4 @@ O squads.sh requer:
 - `description` não-vazio (mín. 10 caracteres)
 - Pelo menos 1 agente definido
 - `squad.yaml` com `aios.type: squad`
+

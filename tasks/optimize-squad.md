@@ -131,3 +131,4 @@ A task `optimizeSquad()` é a **quinta fase** do pipeline. É o único agente co
 - Toda edição é registrada no relatório com justificativa
 - Nenhuma edição pode quebrar o encadeamento de contratos Entrada/Saída
 - Se uma consolidação é ambígua, preservar ambos os agentes e sinalizar para revisão humana
+

@@ -155,3 +155,4 @@ A task `validateSquad()` é a **sexta fase** do pipeline e funciona como **gate 
 - **PASSED**: Todas as 6 categorias aprovadas → pipeline avança para Fase 7
 - **FAILED**: Qualquer categoria reprovada → relatório retorna ao orquestrador
 - O orquestrador decide se re-executa fases específicas ou solicita correção manual
+

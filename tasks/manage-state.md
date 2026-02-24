@@ -200,3 +200,4 @@ Além do `config.json` (machine-readable), gera um `STATE.md` (human-readable):
 - `config.json` é gravado de forma atômica (write-to-temp + rename)
 - Em caso de falha, o estado anterior é preservado
 - STATE.md é derivado de config.json e pode ser regenerado
+
